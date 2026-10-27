@@ -257,6 +257,47 @@ prueba("el ejemplo del ACR de la sepsis: SAC 1, equipo en 72 h, cronología cohe
   [ "", "ej-p1", "ej-p2" ].forEach(e => igual(solapes(D.colocar(L.datosDibujo(ejAcr, { porques: true, espina: e }), {})), [], "espina " + e));
 });
 
+
+// ---------- ACR: afirmaciones, medidas, cierre e informe ----------
+prueba("cinco reglas: la afirmación del capítulo cumple; las malas, no", () => {
+  igual(L.avisosAfirmacion({ texto: "Como la reevaluación de la sala de espera no estaba asignada a ningún puesto en el turno de noche, el deterioro de la paciente no se detectó durante tres horas.", deber: "Protocolo, ap. 3" }), []);
+  const r = f => L.avisosAfirmacion({ texto: f, deber: "" }).map(x => x.regla);
+  si(r("La enfermera fue descuidada y no reevaluó a la paciente.").includes(2)); si(r("La enfermera fue descuidada y no reevaluó a la paciente.").includes(5));
+  si(r("El manual está mal escrito.").includes(2)); si(r("Un residente cansado.").includes(1));
+  si(r("La enfermera se olvidó de reevaluar, lo que llevó a que la paciente empeorara sin que nadie lo viera durante tres horas.").includes(3));
+  si(r("La enfermera no siguió el protocolo de sala de espera, lo que llevó a que la paciente no fuera reevaluada en tres horas.").includes(4));
+  igual(L.avisosAfirmacion({ texto: "", deber: "" }), []);
+});
+prueba("afirmación sugerida desde la causa de fondo", () => {
+  const t = L.afirmacionSugerida(ejAcr, ejAcr.causas.find(x => x.id === "ej-s05"));
+  si(/^Como de noche, la misma enfermera cubre la sala/.test(t)); si(/la paciente no fue reevaluada/.test(t)); si(/aumentó la probabilidad/.test(t));
+});
+prueba("avisos de afirmaciones: causas sin afirmación y pruebas", () => {
+  const a = conCausas([["personal", "A", { elegida: true }]]); si(L.avisosAfirmaciones(a).some(x => /Falta la afirmación/.test(x.texto)));
+  a.afirmaciones.push(Object.assign(L.nuevaAfirmacion("f"), { causaId: a.causas[0].id, texto: "Como A no estaba definida, pasó B, lo que aumentó la probabilidad de C." }));
+  const T = L.avisosAfirmaciones(a).map(x => x.texto).join("|"); si(!/Falta la afirmación/.test(T)); si(/pruebas o datos/.test(T));
+});
+prueba("cierre: avisos y conclusiones propuestas", () => {
+  const a = nuevo({ tipo: "acr" }); const T = L.avisosCerrar(a, "2027-01-01").map(x => x.texto).join("|"); si(/paciente o a la familia/.test(T)); si(/conclusiones/.test(T));
+  igual(L.avisosCerrar(ejAcr, "2027-02-10").filter(x => x.nivel === "warn"), []);
+  const c = L.conclusionesSugeridas(ejAcr); si(/3 factores del sistema/.test(c)); si(/1 fuerte, 2 intermedias/.test(c));
+});
+prueba("el ejemplo del ACR, completo: progreso 8/8, acciones y paquete", () => {
+  igual(Object.values(L.progreso(ejAcr)).every(Boolean), true);
+  igual(ejAcr.acciones.map(L.fuerzaAccion), ["fuerte", "intermedia", "intermedia"]);
+  si(ejAcr.afirmaciones.every(L.cumpleReglas));
+  const p = L.paqueteIntercambio([ejAcr], "2026.03", "x").analisis[0]; igual(p.cerrado, true); igual(p.afirmaciones.length, 3); igual(p.acciones[0].fuerza, "fuerte");
+  const s = L.sanearAnalisis(JSON.parse(JSON.stringify(ejAcr)), genId, "f"); igual(s.verificacion.length, 12); igual(s.acciones[0].controla, "servicio"); igual(s.acciones[1].indicador.tipo, "funciona");
+});
+prueba("informe del ACR: bloques, tres espinas y Word con imágenes", () => {
+  const d = L.documentoInforme(ejAcr, "27/10/2026", null);
+  igual(d.bloques.filter(b => b.t === "espina").length, 3); igual(d.bloques.filter(b => b.t === "h1" && /^\d\. /.test(b.texto)).length, 9); si(d.bloques.some(b => b.t === "lista"));
+  const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), im = { png, w: 1200, h: 400 };
+  const d2 = L.documentoInforme(ejAcr, "27/10/2026", { "": im, "ej-p1": im, "ej-p2": im }); igual(d2.bloques.filter(b => b.t === "imagen").length, 3);
+  const bytes = W.construirDocx(Object.assign({ pie: "x", horizontal: true }, d2)); si(bytes.length > 5000); igual([bytes[0], bytes[1]], [0x50, 0x4b]);
+  si(X.construirLibroXlsx(L.hojasExcel(ejAcr, "x")).length > 3000);
+});
+
 // ---------- Contenido ----------
 prueba("test: cinco preguntas del capítulo 8 con respuesta válida", () => { igual(C.TEST.length, 5); C.TEST.forEach(q => si(q.ok >= 0 && q.ok < q.o.length && C.TEMAS_TEST[q.t])); });
 prueba("glosario sin duplicados", () => { const k = C.GLOSARIO.map(g => g[0]); igual(new Set(k).size, k.length); });

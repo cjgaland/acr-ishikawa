@@ -141,14 +141,14 @@
       plantilla: "guia", categoriasPropias: Array(MAX_PROPIAS).fill(""), causas: [], efectoPrincipal: "", preguntas: [],
       // Afirmaciones, acciones e información (ACR)
       afirmaciones: [], acciones: [],
-      informacion: { profesionales: "", paciente: "", direccion: "", nota: "" }, apoyo: { paciente: false, profesionales: false, nota: "" },
+      informacion: { profesionales: "", paciente: "", direccion: "", comision: "", nota: "" }, apoyo: { paciente: false, profesionales: false, nota: "" }, verificacion: [],
       conclusiones: "", proxRevision: "", notas: "", origen: "",
       creado: fecha, modificado: fecha
     };
   }
   function nuevaCausa(id, cat = "", espina = "") { return { id, cat, espina, texto: "", porques: Array(MAX_PORQUES).fill(""), votos: 0, elegida: false, comprobacion: "", prueba: "" }; }
-  const nuevoIndicador = () => ({ nombre: "", numerador: "", denominador: "", esperado: "", fecha: "" });
-  function nuevaAccion(id) { return { id, que: "", categoria: "", causas: [], responsable: "", plazo: "", estado: "pendiente", indicador: nuevoIndicador(), nota: "" }; }
+  const nuevoIndicador = () => ({ nombre: "", numerador: "", denominador: "", esperado: "", fecha: "", tipo: "", resultado: "", alcanzado: "" });
+  function nuevaAccion(id) { return { id, que: "", categoria: "", causas: [], responsable: "", plazo: "", estado: "pendiente", indicador: nuevoIndicador(), nota: "", controla: "", direccion: "", motivoDireccion: "" }; }
   const nuevoMiembro = id => ({ id, perfil: "", servicio: "", papel: "miembro", implicado: false });
   const nuevaEntrevista = id => ({ id, perfil: "", fecha: "", hecha: false, nota: "" });
   const nuevaReunion = id => ({ id, fecha: "", duracion: "", nota: "" });
@@ -430,6 +430,140 @@
   const respuesta = (a, id) => (a.preguntas.find(q => q.id === id) || { r: "" }).r;
   function responder(a, id, r) { a.preguntas = a.preguntas.filter(q => q.id !== id); if (r) a.preguntas.push({ id, r }); }
 
+  // ---------- Afirmaciones causales (RCA², apéndice 6: las cinco reglas de la causalidad) ----------
+  const REGLAS = [
+    { n: 1, nom: "Mostrar la relación causa-efecto", que: "Decir cómo la causa produjo el efecto, y qué pasó por ello." },
+    { n: 2, nom: "Descripciones precisas, no negativas ni vagas", que: "Nada de «mal», «inadecuado», «deficiente», «descuidado»." },
+    { n: 3, nom: "Todo error humano tiene una causa previa", que: "Explicar qué hizo posible el error." },
+    { n: 4, nom: "Saltarse un procedimiento no es una causa raíz", que: "Explicar por qué no se siguió." },
+    { n: 5, nom: "No actuar solo es causa si había obligación de actuar", que: "Decir dónde está escrito ese deber." }
+  ];
+  const VAGAS = ["mal", "malo", "mala", "deficiente", "inadecuado", "inadecuada", "incorrecto", "incorrecta", "pobre", "insuficiente", "descuidado", "descuidada", "negligente", "fallo", "fallaron", "fallo", "erroneo", "erronea", "pesimo", "pesima"];
+  const palabrasVagas = t => { const w = sinTildes(t).replace(/[^a-zñ ]/g, " ").split(/\s+/); return VAGAS.filter(v => w.includes(v)); };
+  const CONECTOR = /\b(como|porque|ya que|dado que|al no|debido a|a causa de|lo que|por lo que|de modo que|y por eso|asi que|hizo que|llevo a|aumento la probabilidad|permitio|provoco|facilito)\b/;
+  const OMISION = /\bno (se )?(comprob|avis|revis|reevalu|regist|llam|hizo|hicieron|actu|detect|vigil|mir|tom)/;
+  // Avisos de una afirmación causal (sin bloquear). Cada aviso lleva la regla que toca.
+  function avisosAfirmacion(f) {
+    const A = [], t = sinTildes(f.texto);
+    if (!lleno(f.texto)) return A;
+    if (!CONECTOR.test(t)) A.push({ regla: 1, texto: "No se ve la relación causa-efecto. Prueba con «Como [causa], [efecto], lo que aumentó la probabilidad de [lo que pasó]»." });
+    if (t.length < 50) A.push({ regla: 1, texto: "Muy corta: di la causa, el efecto y lo que pasó por ello." });
+    const v = palabrasVagas(f.texto); if (v.length) A.push({ regla: 2, texto: `Palabras vagas o negativas («${v.join("», «")}»): sustitúyelas por una descripción concreta de lo que había o faltaba.` });
+    const p = palabrasNoNeutras(f.texto); if (p.length) A.push({ regla: 2, texto: `Juicios o culpa («${p.join("», «")}»): describe hechos del sistema.` });
+    if (ERROR_HUMANO.test(t) && !/\b(como|porque|ya que|dado que|debido a|a causa de)\b[^.]{10,}\b(olvid|despist|equivoc|descuid|error)/.test(t) && t.indexOf("error humano") >= 0) A.push({ regla: 3, texto: "«Error humano» no es la causa: explica qué lo hizo posible." });
+    else if (ERROR_HUMANO.test(t) && t.search(CONECTOR) > t.search(ERROR_HUMANO)) A.push({ regla: 3, texto: "El error de la persona aparece como causa. Empieza por lo que lo hizo posible (el sistema) y deja el error como efecto." });
+    if (SALTO_NORMA.test(t) && t.search(CONECTOR) > t.search(SALTO_NORMA)) A.push({ regla: 4, texto: "Saltarse el protocolo no es la causa de fondo: di por qué no se siguió (carga, diseño, falta de asignación…)." });
+    if (OMISION.test(t) && !lleno(f.deber)) A.push({ regla: 5, texto: "Habla de algo que no se hizo: indica dónde está escrito ese deber (protocolo, apartado). Si no lo había, la causa es que no estaba definido." });
+    if (/\b(enfermer[ao]|medic[ao]|celador|auxiliar|tcae|residente|supervisor[a]?)\b/.test(t) && /\b(no (quiso|supo)|se nego|ignor)/.test(t)) A.push({ regla: 2, texto: "Apunta a una persona: describe las condiciones, no la actitud." });
+    return A;
+  }
+  // Propuesta de afirmación a partir de una causa de fondo y el problema
+  function afirmacionSugerida(a, x) {
+    const fondo = limpia(causaFondo(x)).replace(/^./, m => m.toLowerCase()), causa = limpia(x.texto).replace(/^./, m => m.toLowerCase());
+    const pa = a.problemasAtencion.find(p => p.id === x.espina), efecto = pa ? limpia(pa.texto).replace(/^./, m => m.toLowerCase()) : "";
+    const evento = limpia(a.problema || "lo ocurrido").replace(/^./, m => m.toLowerCase());
+    return `Como ${fondo}${fondo !== causa ? ` (${causa})` : ""}, ${efecto || "[efecto]"}, lo que aumentó la probabilidad de que ${evento}.`;
+  }
+  const cumpleReglas = f => lleno(f.texto) && !avisosAfirmacion(f).length;
+  function avisosAfirmaciones(a) {
+    const A = [], E = elegidas(a).filter(x => x.prueba !== "descartada"), F = a.afirmaciones.filter(f => lleno(f.texto));
+    if (!E.length) { A.push({ nivel: "nota", texto: "Primero elige las causas de fondo en la espina (paso 5)." }); return A; }
+    E.forEach(x => { if (!a.afirmaciones.some(f => f.causaId === x.id && lleno(f.texto))) A.push({ nivel: "nota", texto: `Falta la afirmación causal de «${corto(x.texto, 50)}».` }); });
+    F.forEach((f, i) => avisosAfirmacion(f).forEach(r => A.push({ nivel: "warn", afirmacion: f.id, texto: `Regla ${r.regla}: ${r.texto}` })));
+    F.forEach(f => { if (!lleno(f.pruebas)) A.push({ nivel: "nota", afirmacion: f.id, texto: "Anota qué pruebas o datos la sostienen (el informe debe decir por qué se eligió este factor)." }); });
+    return A;
+  }
+
+  // ---------- Medidas y cierre (RCA², apéndice 7; guía de acciones del NHS) ----------
+  const TIPOS_MEDIDA = { existe: "Está implantada", sehace: "Se hace como se previó", funciona: "Funciona (el resultado cambia)" };
+  const CONTROLA = { persona: "Una persona", equipo: "El equipo o la unidad", servicio: "El servicio o la dirección de área", organizacion: "La organización" };
+  // Lista de verificación del cierre (adaptada de las recomendaciones del Ministerio de Sanidad, 2021, y del RCA²)
+  const VERIFICACION = [
+    { id: "v-equipo", t: "El equipo no incluyó a los implicados; se les entrevistó." },
+    { id: "v-72", t: "El análisis empezó en las 72 horas siguientes a la decisión." },
+    { id: "v-hechos", t: "La cronología se apoya en la historia, los registros y las entrevistas, no en recuerdos." },
+    { id: "v-reglas", t: "Las afirmaciones causales cumplen las cinco reglas." },
+    { id: "v-fuerte", t: "Hay al menos una acción fuerte o intermedia." },
+    { id: "v-medida", t: "Cada acción tiene responsable, plazo e indicador con fecha de medida." },
+    { id: "v-direccion", t: "La dirección ha dado su acuerdo a las acciones (o ha dicho por qué no)." },
+    { id: "v-familia", t: "Se ha informado al paciente o a la familia de lo ocurrido y de lo que se cambia." },
+    { id: "v-prof", t: "Se ha informado a los profesionales implicados y a la unidad." },
+    { id: "v-apoyo", t: "Se ha ofrecido apoyo al paciente, a la familia y a los profesionales (segundas víctimas)." },
+    { id: "v-anon", t: "El informe no lleva nombres ni datos que identifiquen al paciente ni a los profesionales." },
+    { id: "v-seguimiento", t: "Hay fecha para revisar si las acciones funcionan (comisión o unidad de seguridad)." }
+  ];
+  function avisosCerrar(a, hoy) {
+    const A = [], I = a.informacion, X = a.acciones.filter(x => lleno(x.que));
+    if (!lleno(I.profesionales)) A.push({ nivel: "nota", texto: "Anota cuándo y quién informó a los profesionales implicados." });
+    if (!lleno(I.paciente)) A.push({ nivel: "warn", texto: "Falta la información al paciente o a la familia: el informe RCA² y el Protocolo de Londres 2024 la consideran parte del análisis, no un trámite." });
+    if (!a.apoyo.profesionales) A.push({ nivel: "nota", texto: "¿Se ha ofrecido apoyo a los profesionales implicados? Son también víctimas del incidente." });
+    if (X.some(x => x.direccion === "no" && !lleno(x.motivoDireccion))) A.push({ nivel: "nota", texto: "Alguna acción no tiene el acuerdo de la dirección: anota el motivo y si se propone otra." });
+    if (X.length && !X.some(x => x.direccion === "si")) A.push({ nivel: "nota", texto: "Ninguna acción tiene todavía el acuerdo de la dirección. Solo la dirección puede aceptar el riesgo de no hacerla." });
+    if (!lleno(a.conclusiones)) A.push({ nivel: "nota", texto: "Escribe las conclusiones (puedes pedir una propuesta)." });
+    const P = plazos(a, hoy); if (P && P.pasado45 && !lleno(a.conclusiones)) A.push({ nivel: "warn", texto: `Han pasado más de 45 días desde la decisión (${fmtFecha(P.base)}). Cierra el análisis: lo importante es poner en marcha las acciones.` });
+    if (!lleno(a.proxRevision)) A.push({ nivel: "nota", texto: "Pon una fecha para revisar si las acciones funcionan." });
+    return A;
+  }
+  function conclusionesSugeridas(a) {
+    const E = elegidas(a).filter(x => x.prueba !== "descartada"), X = a.acciones.filter(x => lleno(x.que)), F = X.map(fuerzaAccion);
+    const nF = F.filter(f => f === "fuerte").length, nI = F.filter(f => f === "intermedia").length, nD = F.filter(f => f === "debil").length;
+    const pa = a.problemasAtencion.filter(p => lleno(p.texto));
+    const t = [];
+    t.push(`El análisis de ${a.incidente.clase === "casi" ? "este casi incidente" : "este incidente"} no encontró un culpable, sino ${plural(E.length, "factor del sistema", "factores del sistema")} que lo hicieron posible${pa.length ? `, en torno a ${plural(pa.length, "problema en la atención", "problemas en la atención")}: ${listaY(pa.map(p => limpia(p.texto).replace(/^./, m => m.toLowerCase())))}` : ""}.`);
+    if (E.length) t.push(`Las causas de fondo: ${listaY(E.map(x => limpia(causaFondo(x)).replace(/^./, m => m.toLowerCase())))}.`);
+    if (X.length) t.push(`Se proponen ${plural(X.length, "acción", "acciones")}${nF || nI ? ` (${[nF ? plural(nF, "fuerte", "fuertes") : "", nI ? plural(nI, "intermedia", "intermedias") : "", nD ? plural(nD, "débil", "débiles") : ""].filter(Boolean).join(", ")})` : ""}, cada una con responsable, plazo e indicador. ${nF ? "La más fuerte cambia el sistema para que el error no dependa de la memoria de nadie." : "Conviene buscar al menos una acción fuerte que cambie el sistema."}`);
+    t.push("Las conclusiones se han compartido con los profesionales implicados y con el paciente o su familia, y las acciones se revisarán en la fecha prevista.");
+    return t.join(" ");
+  }
+  const accionesDe = (a, causaId) => a.acciones.filter(x => lleno(x.que) && x.causas.includes(causaId));
+
+  // ---------- Informe del ACR (lista de bloques) ----------
+  function documentoInforme(a, fecha, imagenes) {
+    const B = [], I = a.incidente, n = nivelSAC(a), E = ranking(a).filter(x => x.elegida), X = a.acciones.filter(x => lleno(x.que)), F = a.afirmaciones.filter(f => lleno(f.texto));
+    const img = (k, pie) => { const im = imagenes && imagenes[k]; return im ? Object.assign({ t: "imagen", maxAlto: 13, pie }, im) : { t: "espina", espina: k }; };
+    B.push({ t: "portada", titulo: "Análisis causa raíz", sub: a.titulo || corto(a.problema, 120), extra: [[a.unidad, fecha].filter(lleno).join(" · "), "Informe para aprender y mejorar el sistema, no para señalar personas. Sin datos que identifiquen al paciente ni a los profesionales."] });
+    B.push({ t: "h1", texto: "1. El incidente y la decisión de analizarlo" });
+    B.push({ t: "p", runs: [{ texto: a.problema || "Sin escribir.", negrita: true }] });
+    if (lleno(a.descripcion)) B.push({ t: "p", texto: a.descripcion });
+    B.push({ t: "tabla", cab: ["Dato", "Valor"], filas: [["Tipo", CLASES[I.clase] || "Sin indicar"], ["Fecha del incidente", fmtFecha(I.fecha)], ["Decisión de analizarlo", fmtFecha(I.fechaDecision)], ["Nivel de riesgo (SAC del SiNASP)", n ? `${NIVELES_SAC[n].nom}: ${NIVELES_SAC[n].que}` : "Sin calcular"], ["Gravedad", lleno(I.gravedad) ? GRAVEDADES[a.ambito === "primaria" ? "primaria" : "hospital"][Number(I.gravedad) - 1] || "" : ""], ["Frecuencia", lleno(I.frecuencia) ? FRECUENCIAS[Number(I.frecuencia) - 1] || "" : ""], ["Cultura justa", I.conducta === "no" ? "No hubo conducta que deba tratarse por otra vía" : I.conducta === "si" ? "Hay una conducta que se trata por otra vía" : ""]].filter(f => lleno(f[1])), anchos: [30, 70], fuente: 9 });
+    if (lleno(I.nota)) B.push({ t: "p", estilo: "nota", texto: I.nota });
+    B.push({ t: "h1", texto: "2. Equipo y método" });
+    const P = plazos(a, null);
+    if (a.equipo.length) B.push({ t: "tabla", cab: ["Perfil", "Servicio", "Papel"], filas: a.equipo.map(m => [m.perfil, m.servicio, PAPELES[m.papel]]), anchos: [45, 30, 25], fuente: 9 });
+    B.push({ t: "p", texto: `${plural(a.reuniones.length, "reunión", "reuniones")} del equipo${P && P.primera ? `; la primera el ${fmtFecha(P.primera)}${P.tarde ? " (fuera de las 72 horas recomendadas)" : " (dentro de las 72 horas)"}` : ""}. ${plural(a.entrevistas.length, "entrevista", "entrevistas")}${a.entrevistas.length ? ": " + listaY(a.entrevistas.map(e => e.perfil).filter(lleno)) : ""}. Método: cronología y comparación con lo que debería haber pasado, problemas en la atención, factores contribuyentes con un diagrama de Ishikawa por problema, afirmaciones causales con las cinco reglas de la causalidad y acciones según su fuerza (informe RCA², Protocolo de Londres).` });
+    B.push({ t: "h1", texto: "3. Qué pasó: la cronología" });
+    if (a.cronologia.length) B.push({ t: "tabla", cab: ["Hora", "Lo que pasó", "Fuente", "Lo que debería haber pasado"], filas: a.cronologia.map(h => [h.hora, { texto: (h.desajuste ? "⚠ " : h.bien ? "✓ " : "") + h.hecho, negrita: h.desajuste }, FUENTES[h.fuente] || "", h.debia]), anchos: [9, 38, 14, 39], fuente: 8.5 });
+    const bien = a.cronologia.filter(h => h.bien && lleno(h.hecho)); if (bien.length) B.push({ t: "p", texto: "Lo que salió bien: " + listaY(bien.map(h => limpia(h.hecho).replace(/^./, m => m.toLowerCase()))) + "." });
+    B.push({ t: "h1", texto: "4. Problemas en la atención" });
+    const pa = a.problemasAtencion.filter(p => lleno(p.texto));
+    if (pa.length) B.push({ t: "lista", items: pa.map(p => p.texto) }); else B.push({ t: "p", estilo: "nota", texto: "No se han definido." });
+    B.push({ t: "h1", texto: "5. Factores contribuyentes" });
+    espinasDe(a).forEach((e, i) => {
+      const C = causasCon(a).filter(x => (x.espina || "") === e.id); if (!C.length && e.id) return;
+      B.push({ t: "h2", texto: e.id ? `Espina ${i}: ${e.texto}` : "Espina principal: el problema" });
+      B.push(img(e.id, "En color, las causas de fondo elegidas."));
+      if (C.length) B.push({ t: "tabla", cab: ["Categoría", "Factor", "¿Por qué?", "De fondo"], filas: categorias(a).flatMap(c => C.filter(x => x.cat === c.k).map((x, j) => [j ? "" : { texto: c.nom, negrita: true }, x.texto, x.porques.filter(lleno).join(" → "), { texto: x.elegida ? "✓" : "", centro: true }])), anchos: [16, 36, 40, 8], fuente: 8.5 });
+    });
+    B.push({ t: "h1", texto: "6. Afirmaciones causales" });
+    if (F.length) B.push({ t: "tabla", cab: ["Nº", "Afirmación causal", "Deber previo", "Pruebas o datos"], filas: F.map((f, i) => [{ texto: String(i + 1), centro: true }, f.texto, f.deber, f.pruebas]), anchos: [5, 50, 20, 25], fuente: 8.5 });
+    else B.push({ t: "p", estilo: "nota", texto: "Sin afirmaciones causales." });
+    B.push({ t: "h1", texto: "7. Plan de acción y medida" });
+    if (X.length) B.push({ t: "tabla", cab: ["Acción", "Causa que ataca", "Fuerza", "Responsable", "Plazo", "Indicador y medida", "Dirección"], filas: X.map(x => [x.que, x.causas.map(id => { const c = a.causas.find(y => y.id === id); return c ? c.texto : ""; }).filter(lleno).join("; "), fz(x), [x.responsable, x.controla ? "(" + CONTROLA[x.controla].toLowerCase() + ")" : ""].filter(lleno).join(" "), fmtFecha(x.plazo), [TIPOS_MEDIDA[x.indicador.tipo] ? TIPOS_MEDIDA[x.indicador.tipo] + ": " : "", textoIndicador(x.indicador), lleno(x.indicador.resultado) ? "Resultado: " + x.indicador.resultado + (x.indicador.alcanzado ? (x.indicador.alcanzado === "si" ? " (alcanzado)" : " (no alcanzado)") : "") : ""].filter(lleno).join(" "), x.direccion === "si" ? "De acuerdo" : x.direccion === "no" ? "No: " + x.motivoDireccion : ""]), anchos: [24, 15, 10, 13, 8, 20, 10], fuente: 8 });
+    else B.push({ t: "p", estilo: "nota", texto: "Sin acciones." });
+    const r = resumen(a); if (X.length) B.push({ t: "p", estilo: "nota", texto: `${plural(r.acciones, "acción", "acciones")}: ${r.fuertes} fuertes, ${r.intermedias} intermedias y ${r.debiles} débiles (jerarquía del informe RCA²).` });
+    B.push({ t: "h1", texto: "8. Información y apoyo" });
+    const inf = a.informacion;
+    B.push({ t: "tabla", cab: ["A quién", "Cuándo y quién"], filas: [["Profesionales implicados y unidad", inf.profesionales], ["Paciente o familia", inf.paciente], ["Dirección", inf.direccion], ["Comisión de seguridad", inf.comision]].filter(f => lleno(f[1])), anchos: [35, 65], fuente: 9 });
+    B.push({ t: "p", texto: `Apoyo ofrecido: ${[a.apoyo.paciente ? "al paciente y a la familia" : "", a.apoyo.profesionales ? "a los profesionales implicados" : ""].filter(Boolean).join(" y ") || "sin anotar"}.${lleno(a.apoyo.nota) ? " " + a.apoyo.nota : ""}` });
+    B.push({ t: "h1", texto: "9. Conclusiones" });
+    B.push({ t: "p", texto: a.conclusiones || conclusionesSugeridas(a) });
+    if (lleno(a.proxRevision)) B.push({ t: "p", texto: "Revisión de las acciones: " + fmtFecha(a.proxRevision) + "." });
+    const V = VERIFICACION.filter(v => a.verificacion.includes(v.id)); if (V.length) { B.push({ t: "h2", texto: "Lista de verificación" }); B.push({ t: "lista", items: V.map(v => v.t) }); }
+    if (lleno(a.notas)) { B.push({ t: "h1", texto: "Notas" }); B.push({ t: "p", texto: a.notas }); }
+    B.push({ t: "p", estilo: "nota", texto: "Método: National Patient Safety Foundation, RCA² (2016); Taylor-Adams y Vincent, Protocolo de Londres (2004 y 2024); Ministerio de Sanidad, Recomendaciones para el análisis de los incidentes de seguridad del paciente con daño (2021); SiNASP, matriz SAC (2024)." });
+    return { titulo: "ACR · " + (a.titulo || corto(a.problema, 60)), bloques: B };
+  }
+
   // ---------- Pasos ----------
   const PASOS = {
     ishikawa: [
@@ -459,8 +593,8 @@
       acciones: X.length > 0 && X.every(x => lleno(x.responsable) && lleno(x.plazo) && lleno(x.indicador.nombre)),
       decidir: !!nivelSAC(a) && lleno(a.incidente.fecha) && !!a.incidente.clase && a.incidente.conducta === "no",
       equipo: a.equipo.filter(m => lleno(m.perfil) && !m.implicado).length >= 4, cronologia: a.cronologia.filter(h => lleno(h.hecho)).length >= 3 && (!a.cronologia.some(h => h.desajuste) || a.problemasAtencion.some(p => lleno(p.texto))),
-      afirmaciones: elegidas(a).length > 0 && a.afirmaciones.some(f => lleno(f.texto)),
-      cerrar: lleno(a.informacion.profesionales) && lleno(a.informacion.paciente)
+      afirmaciones: elegidas(a).filter(x => x.prueba !== "descartada").length > 0 && elegidas(a).filter(x => x.prueba !== "descartada").every(x => a.afirmaciones.some(f => f.causaId === x.id && cumpleReglas(f))),
+      cerrar: lleno(a.informacion.profesionales) && lleno(a.informacion.paciente) && lleno(a.conclusiones)
     };
     pasosDe(a).forEach(p => { r[p.n] = !!hecho[p.k]; });
     if (a.tipo === "acr") r[5] = hecho.espina && elegidas(a).length > 0;
@@ -508,7 +642,8 @@
         acciones: a.acciones.filter(x => lleno(x.que)).map(x => ({ id: x.id, que: x.que, fuerza: fuerzaAccion(x) || null, categoria: x.categoria ? JERARQUIA[x.categoria].nom : null, responsable: x.responsable, plazo: x.plazo, estado: x.estado,
           causas: x.causas.map(id => { const c = a.causas.find(y => y.id === id); return c ? c.texto : ""; }).filter(lleno),
           indicador: lleno(x.indicador.nombre) ? Object.assign({}, x.indicador) : null })),
-        cerrado: a.tipo === "acr" ? lleno(a.informacion.profesionales) && lleno(a.informacion.paciente) : false
+        informado: a.tipo === "acr" ? { profesionales: lleno(a.informacion.profesionales), paciente: lleno(a.informacion.paciente) } : null,
+        cerrado: a.tipo === "acr" ? lleno(a.informacion.profesionales) && lleno(a.informacion.paciente) && lleno(a.conclusiones) : false
       }))
     };
   }
@@ -585,8 +720,8 @@
   const TODAS_CATS = [...new Set(Object.values(PLANTILLAS).flatMap(p => p.cats.map(c => c.k)).concat(Array.from({ length: MAX_PROPIAS }, (_, i) => "p" + i)))];
   const ESQ = {
     causa: { id: "id", cat: { en: ["", ...TODAS_CATS] }, espina: "ref", texto: [500], porques: { lista: 500, keepEmpty: MAX_PORQUES }, votos: "ent", elegida: "b", comprobacion: [1000], prueba: { en: Object.keys(ESTADOS_PRUEBA) } },
-    indicador: { nombre: [500], numerador: [500], denominador: [500], esperado: [60], fecha: [20] },
-    accion: { id: "id", que: [1500], categoria: { en: ["", ...Object.keys(JERARQUIA)] }, causas: { lista: "ref", max: 40 }, responsable: [300], plazo: [20], estado: { en: Object.keys(ESTADOS_ACCION) }, indicador: { obj: "indicador" }, nota: [1000] },
+    indicador: { nombre: [500], numerador: [500], denominador: [500], esperado: [60], fecha: [20], tipo: { en: ["", ...Object.keys(TIPOS_MEDIDA)] }, resultado: [100], alcanzado: { en: ["", "si", "no"] } },
+    accion: { id: "id", que: [1500], categoria: { en: ["", ...Object.keys(JERARQUIA)] }, causas: { lista: "ref", max: 40 }, responsable: [300], plazo: [20], estado: { en: Object.keys(ESTADOS_ACCION) }, indicador: { obj: "indicador" }, nota: [1000], controla: { en: ["", ...Object.keys(CONTROLA)] }, direccion: { en: ["", "si", "no"] }, motivoDireccion: [1000] },
     miembro: { id: "id", perfil: [200], servicio: [200], papel: { en: Object.keys(PAPELES) }, implicado: "b" },
     respuesta: { id: [20], r: { en: ["", "si", "no", "na"] } },
     entrevista: { id: "id", perfil: [200], fecha: [20], hecha: "b", nota: [1000] },
@@ -596,13 +731,13 @@
     afirmacion: { id: "id", causaId: "ref", texto: [2000], deber: [500], pruebas: [1000] },
     inmediata: { atendido: "b", seguro: "b", apartado: "b", informado: "b" },
     incidente: { clase: { en: ["", "ea", "casi", "sindano", "situacion"] }, fecha: [20], fechaDecision: [20], gravedad: [2], frecuencia: [2], conducta: { en: ["", "no", "si"] }, inmediata: { obj: "inmediata" }, nota: [1000] },
-    informacion: { profesionales: [500], paciente: [500], direccion: [500], nota: [1000] },
+    informacion: { profesionales: [500], paciente: [500], direccion: [500], comision: [500], nota: [1000] },
     apoyo: { paciente: "b", profesionales: "b", nota: [1000] },
     analisis: { id: "id", tipo: { en: Object.keys(TIPOS) }, titulo: [200], unidad: [200], ambito: { en: ["hospital", "primaria", "otro"] }, fecha: [20], responsable: [200],
       incidente: { obj: "incidente" }, descripcion: [4000], problema: [600], dato: [500], fuenteDato: [300],
       equipo: { de: "miembro", max: 20 }, entrevistas: { de: "entrevista", max: 40 }, reuniones: { de: "reunion", max: 40 }, cronologia: { de: "hecho", max: 200 }, problemasAtencion: { de: "problemaAt", max: 30 },
       plantilla: { en: Object.keys(PLANTILLAS) }, categoriasPropias: { lista: 60, keepEmpty: MAX_PROPIAS }, causas: { de: "causa", max: 300 }, efectoPrincipal: [600], preguntas: { de: "respuesta", max: 120 },
-      afirmaciones: { de: "afirmacion", max: 60 }, acciones: { de: "accion", max: 60 }, informacion: { obj: "informacion" }, apoyo: { obj: "apoyo" },
+      afirmaciones: { de: "afirmacion", max: 60 }, acciones: { de: "accion", max: 60 }, informacion: { obj: "informacion" }, apoyo: { obj: "apoyo" }, verificacion: { lista: 20, max: 20 },
       conclusiones: [5000], proxRevision: [20], notas: [3000], origen: [300], creado: [40], modificado: [40] }
   };
   const FABRICA = { respuesta: () => ({ id: "", r: "" }), causa: id => nuevaCausa(id), indicador: nuevoIndicador, accion: nuevaAccion, miembro: nuevoMiembro, entrevista: nuevaEntrevista, reunion: nuevaReunion, hecho: nuevoHecho, problemaAt: nuevoProblemaAt, afirmacion: nuevaAfirmacion,
@@ -666,6 +801,7 @@
     pareceDatoPaciente, hayDatoPersonal, palabrasNoNeutras, tipoProblema, esGenerica,
     avisosProblema, avisosCausa, avisosEspina, avisosElegir, avisosAcciones, avisoPrivacidad,
     PASOS, pasosDe, progreso, pasoPendiente, nombreAnalisis, siguientePaso, resumen, datosDibujo,
+    REGLAS, palabrasVagas, avisosAfirmacion, afirmacionSugerida, cumpleReglas, avisosAfirmaciones, TIPOS_MEDIDA, CONTROLA, VERIFICACION, avisosCerrar, conclusionesSugeridas, accionesDe, documentoInforme,
     FORMATO, VERSION_INTERCAMBIO, paqueteIntercambio, leerIntercambio,
     documentoFicha, textoIndicador, hojasExcel,
     ESQ, sanear, sanearAnalisis, sanearDatos, fusionar

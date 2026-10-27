@@ -15,8 +15,15 @@
   // ---------- Versión y novedades ----------
   // Al publicar cambios: añadir una entrada AL PRINCIPIO de NOVEDADES, poner su versión en los ?v= de index.html, en
   // APP_VERSION y subir CACHE_NAME en sw.js. Formato de versión: AAAA.NN.
-  const APP_VERSION = "2026.02";
+  const APP_VERSION = "2026.03";
   const NOVEDADES = [
+    { version: "2026.03", fecha: "Octubre 2026", titulo: "El análisis causa raíz completo: afirmaciones causales, medida, información e informe", cambios: [
+      "Paso 6: afirmaciones causales con el formato «Como [causa], [efecto], lo que aumentó la probabilidad de [lo que pasó]» y comprobación de las cinco reglas de la causalidad del informe RCA² mientras escribes; propuesta de redacción desde cada causa de fondo.",
+      "Paso 7: en el ACR, cada acción dice quién puede hacerla, si la dirección está de acuerdo y qué mide su indicador (que existe, que se hace o que funciona), con el resultado medido.",
+      "Paso 8: información a los profesionales, al paciente o la familia, a la dirección y a la comisión; apoyo a las segundas víctimas; conclusiones propuestas; lista de verificación antes de cerrar.",
+      "Informe del ACR en Word (con el dibujo de cada espina), PDF y Excel.",
+      "El ejemplo de la sepsis, completo: las tres afirmaciones causales, las tres acciones con su indicador y la información a la familia."
+    ] },
     { version: "2026.02", fecha: "Octubre 2026", titulo: "El análisis causa raíz: decidir, equipo y cronología", cambios: [
       "Paso 1 del ACR: tipo de incidente, matriz de riesgo SAC del SiNASP (hospital y atención primaria) con la recomendación para cada nivel, cultura justa, lo inmediato y los plazos (72 horas para empezar, 30 a 45 días para terminar).",
       "Paso 3: el equipo por perfiles y papeles (de 4 a 6, sin los implicados), con perfiles sugeridos; entrevistas y reuniones.",
@@ -33,7 +40,7 @@
       "El análisis causa raíz completo (gravedad y frecuencia, equipo, cronología, afirmaciones causales, información y apoyo) llega en las próximas versiones."
     ] }
   ];
-  const ENTREGA = 2;   // pasos ya construidos (ver L.PASOS[].entrega)
+  const ENTREGA = 3;   // pasos ya construidos (ver L.PASOS[].entrega)
 
   // ---------- Utilidades ----------
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -225,9 +232,9 @@
   let actual = null, pasoActual = 1;
   const KEY_VISTA = "acrishikawa-vista";
   const vista = (() => { try { return Object.assign({ porques: true, solo: false }, JSON.parse(leer(KEY_VISTA) || "{}")); } catch (e) { return { porques: true, solo: false }; } })();
-  const avisosDe = (a, k) => ({ problema: L.avisosProblema, espina: L.avisosEspina, elegir: L.avisosElegir, acciones: L.avisosAcciones, decidir: x => L.avisosDecidir(x, hoyIso()), equipo: L.avisosEquipo, cronologia: L.avisosCronologia }[k] || (() => []))(a);
+  const avisosDe = (a, k) => ({ problema: L.avisosProblema, espina: L.avisosEspina, elegir: L.avisosElegir, acciones: L.avisosAcciones, decidir: x => L.avisosDecidir(x, hoyIso()), equipo: L.avisosEquipo, cronologia: L.avisosCronologia, afirmaciones: L.avisosAfirmaciones, cerrar: x => L.avisosCerrar(x, hoyIso()) }[k] || (() => []))(a);
   const pasoK = (a, n) => (L.pasosDe(a)[n - 1] || {}).k;
-  const avisosGenerales = (a, n) => { const k = pasoK(a, n); return [...L.avisoPrivacidad(a), ...avisosDe(a, k).filter(x => !x.causa && !x.accion && !x.miembro && !x.hecho)].map(avisoHtml).join(""); };
+  const avisosGenerales = (a, n) => { const k = pasoK(a, n); return [...L.avisoPrivacidad(a), ...avisosDe(a, k).filter(x => !x.causa && !x.accion && !x.miembro && !x.hecho && !x.afirmacion)].map(avisoHtml).join(""); };
 
   function renderAnalisis(a, n) {
     actual = a; pasoActual = n; nAyuda = 0;
@@ -246,7 +253,7 @@
     const sig = L.pasosDe(a).filter(disponible).find(x => x.n > p.n);
     return `<p class="page-lead">${p.que}</p>
       <div class="placeholder-box"><p><b>Este paso llegará en una próxima versión.</b></p>
-      <p>Mientras, puedes decidir si hace falta, formar el equipo, reconstruir la cronología, llenar la espina y diseñar las acciones. Lo que escribas ahora se conserva.</p>
+      <p>Lo que escribas ahora se conserva.</p>
       <div class="toolbar" style="justify-content:center"><a class="btn" href="#/aprende/1">Repasar en «Aprende»</a>${sig ? `<a class="btn btn--primary" href="#/analisis/${a.id}/${sig.n}">Ir al paso ${sig.n} →</a>` : ""}</div></div>`;
   }
 
@@ -379,10 +386,15 @@
         ${campo(x, "plazo", "Plazo", { bind: bac(x, "plazo"), tipo: "date" })}
       </div>
       <div class="field"><div class="field-head"><label class="field-label">Estado</label></div><div class="seg seg--wrap" role="group">${Object.entries(L.ESTADOS_ACCION).map(([k, t]) => `<button type="button" class="${x.estado === k ? "active" : ""}" data-acpick="${x.id}" data-f="estado" data-v="${k}">${t}</button>`).join("")}</div></div>
+      ${a.tipo === "acr" ? `<div class="grid-2"><div class="field"><div class="field-head"><label class="field-label">Quién puede hacerla</label>${ayudaBtn("Clasifica cada acción según quién la controla (Protocolo de Londres): así cada una va a quien puede ponerla en marcha.").btn}</div><div class="input-wrap"><select class="txt-in" ${bac(x, "controla")}><option value="">Elige…</option>${Object.entries(L.CONTROLA).map(([k, t]) => `<option value="${k}"${x.controla === k ? " selected" : ""}>${t}</option>`).join("")}</select></div></div>
+        <div class="field"><div class="field-head"><label class="field-label">¿La dirección está de acuerdo?</label>${ayudaBtn("El equipo propone las acciones más eficaces que se le ocurran, sin recortarse; la dirección decide si merecen la inversión. Solo ella puede aceptar el riesgo de no hacerla (RCA²).").btn}</div><div class="seg" role="group">${[["si", "Sí"], ["no", "No"]].map(([v, t]) => `<button type="button" class="${x.direccion === v ? "active" : ""}" data-acpick="${x.id}" data-f="direccion" data-v="${v}">${t}</button>`).join("")}</div></div></div>
+      ${x.direccion === "no" ? campo(x, "motivoDireccion", "Por qué no, y qué se hace en su lugar", { bind: bac(x, "motivoDireccion"), area: true }) : ""}` : ""}
       <details class="acc-ind"${lleno(x.indicador.nombre) ? " open" : ""}><summary>Indicador: ¿cómo sabréis si funciona?</summary>
+        ${a.tipo === "acr" ? `<div class="field"><div class="field-head"><label class="field-label">Qué mide</label>${ayudaBtn("Tres medidas en el tiempo (guía de acciones del NHS): que la acción existe, que se hace como se previó y, la que importa, que funciona. Empieza por la que puedas medir pronto, pero no te quedes ahí.").btn}</div><div class="seg seg--wrap" role="group">${Object.entries(L.TIPOS_MEDIDA).map(([k, t]) => `<button type="button" class="${x.indicador.tipo === k ? "active" : ""}" data-acpick="${x.id}" data-f="indicador.tipo" data-v="${k}">${t}</button>`).join("")}</div></div>` : ""}
         ${campo(x, "indicador.nombre", "Indicador", { bind: bac(x, "indicador.nombre"), ph: "Por ejemplo: % de pacientes en espera reevaluados dentro de los 90 minutos" })}
         <div class="grid-2">${campo(x, "indicador.numerador", "Numerador", { bind: bac(x, "indicador.numerador"), ph: "Los casos que cumplen", opt: true })}${campo(x, "indicador.denominador", "Denominador", { bind: bac(x, "indicador.denominador"), ph: "Todos los casos que se miran", opt: true })}</div>
         <div class="grid-2">${campo(x, "indicador.esperado", "Nivel esperado", { bind: bac(x, "indicador.esperado"), ph: "≥ 90 %" })}${campo(x, "indicador.fecha", "Cuándo se mide", { bind: bac(x, "indicador.fecha"), tipo: "date" })}</div>
+        <div class="grid-2">${campo(x, "indicador.resultado", "Resultado medido", { bind: bac(x, "indicador.resultado"), ph: "Por ejemplo: 22 de 25 (88 %)", opt: true })}<div class="field"><div class="field-head"><label class="field-label">¿Se alcanzó?</label></div><div class="seg" role="group">${[["si", "Sí"], ["no", "No"]].map(([v, t]) => `<button type="button" class="${x.indicador.alcanzado === v ? "active" : ""}" data-acpick="${x.id}" data-f="indicador.alcanzado" data-v="${v}">${t}</button>`).join("")}</div></div></div>
         <p class="field-sub">Mide lo que cambia (lo que se hace, en cuántos casos de cuántos), no el número de incidentes notificados.<!--[eco]--> Para diseñarlo con calma, usa la app <a href="${L.URL_IND}" target="_blank" rel="noopener">Indicadores ↗</a>; para saber cuántos casos revisar, <a href="${L.URL_TM}" target="_blank" rel="noopener">Tamaño Muestral ↗</a>.<!--[/eco]--></p>
       </details>
       <div data-zac="${x.id}">${L.avisosAcciones(a).filter(y => y.accion === x.id).map(avisoHtml).join("")}</div>
@@ -403,7 +415,7 @@
         <p class="field-sub">Para pegarla en Word, PowerPoint o un correo. La imagen PNG sale a alta resolución; la SVG se amplía sin perder calidad.</p>
         <div class="toolbar"><button class="btn btn--primary" data-act="ex-copiar">📋 Copiar imagen</button><button class="btn" data-act="ex-png">⬇ PNG</button><button class="btn" data-act="ex-svg">⬇ SVG</button><button class="btn" data-act="ex-blanco" title="Plantilla de la espina vacía, con tus categorías, para imprimir en A3 y trabajar con pósits">🖨 Plantilla en blanco</button></div>
         <h3 class="sub-h">El informe</h3>
-        <p class="field-sub">El problema, la espina, la tabla de causas, las causas de fondo y cómo se comprueban, y las acciones con su indicador.</p>
+        <p class="field-sub">${a.tipo === "acr" ? "El informe completo del análisis causa raíz: incidente y decisión, equipo, cronología, problemas en la atención, espinas, afirmaciones causales, plan de acción, información y conclusiones. Se completa en el paso 8." : "El problema, la espina, la tabla de causas, las causas de fondo y cómo se comprueban, y las acciones con su indicador."}</p>
         <div class="toolbar"><button class="btn" data-act="ver-ficha">👁 Ver e imprimir (PDF)</button><button class="btn" data-act="doc-word">⬇ Word</button><button class="btn" data-act="excel">⬇ Excel</button></div>
       </div>
       ${campo(a, "notas", "Notas", { area: true, opt: true, ph: "Cómo se hizo (sesión, técnica), qué queda pendiente…" })}`;
@@ -498,7 +510,60 @@
       <div class="toolbar no-print"><button class="btn" data-act="pa-add">+ Problema en la atención</button></div>
       ${trampa(`Sin nombres ni datos que identifiquen a nadie: usa perfiles y horas.${anonimizador()}`)}`;
   }
-  const RENDER = { problema: pasoProblema, espina: pasoEspina, elegir: a => pasoElegir(a, false), acciones: pasoAcciones, decidir: pasoDecidir, equipo: pasoEquipo, cronologia: pasoCronologia };
+
+  // ---------- ACR · Paso 6: afirmaciones causales ----------
+  const bf = (f, k) => `data-af="${f.id}" data-f="${k}"`;
+  function afirmacionHtml(a, f, i) {
+    const x = a.causas.find(c => c.id === f.causaId), A = L.avisosAfirmacion(f), ok = L.cumpleReglas(f);
+    return `<div class="card af${ok ? " af--ok" : ""}" data-afid="${f.id}">
+      <div class="acc-cab"><b>Afirmación ${i + 1}</b>${x ? `<span class="field-sub">· ${esc(L.corto(x.texto, 60))}</span>` : ""}${ok ? `<span class="fz-b fz-b--fuerte">Cumple las cinco reglas</span>` : ""}<button type="button" class="icon-btn" data-act="af-del" data-id="${f.id}" aria-label="Quitar" title="Quitar">✕</button></div>
+      ${campo(f, "texto", "La afirmación", { bind: bf(f, "texto"), area: true, rows: 3, ph: "Como [causa], [efecto], lo que aumentó la probabilidad de [lo que pasó]." })}
+      ${x ? `<button type="button" class="link-btn" data-act="af-sug" data-id="${f.id}">Proponer una redacción a partir de la causa de fondo</button>` : ""}
+      <div data-zaf="${f.id}">${A.map(r => `<div class="warn">⚠ <b>Regla ${r.regla}.</b> ${esc(r.texto)}</div>`).join("")}</div>
+      <div class="grid-2">${campo(f, "deber", "Deber previo (si habla de algo que no se hizo)", { bind: bf(f, "deber"), ph: "Protocolo de sala de espera, apartado 3", opt: true })}${campo(f, "pruebas", "Pruebas o datos que la sostienen", { bind: bf(f, "pruebas"), ph: "Auditoría, entrevistas, registros…" })}</div>
+    </div>`;
+  }
+  function pasoAfirmaciones(a) {
+    const E = L.elegidas(a).filter(x => x.prueba !== "descartada"), sin = E.filter(x => !a.afirmaciones.some(f => f.causaId === x.id));
+    return `<p class="page-lead">Una afirmación causal une una causa con su efecto y con lo que pasó. Escríbelas con las <b>cinco reglas de la causalidad</b> del informe RCA²: la app las comprueba mientras escribes.</p>
+      ${facil(`<p>El formato que ayuda: <b>«Como [causa], [efecto], lo que aumentó la probabilidad de [lo que pasó]»</b>. Por ejemplo: «Como la reevaluación de la sala de espera no estaba asignada a ningún puesto en el turno de noche, el deterioro de la paciente no se detectó durante tres horas».</p>
+        <table class="mini reglas-t"><thead><tr><th>Regla</th><th>Qué significa</th></tr></thead><tbody>${L.REGLAS.map(r => `<tr><td><b>${r.n}. ${r.nom}</b></td><td>${r.que}</td></tr>`).join("")}</tbody></table>
+        <p>No es un ejercicio de gramática: una afirmación bien escrita apunta al sistema y «vende» por qué hace falta la acción.</p>`)}
+      <div data-zona="avisos">${avisosGenerales(a, pasoActual)}</div>
+      ${sin.length ? `<div class="card"><p class="field-sub">Causas de fondo sin afirmación:</p><div class="chips">${sin.map(x => `<button type="button" class="chip chip--accent" data-act="af-add" data-id="${x.id}">+ ${esc(L.corto(x.texto, 50))}</button>`).join("")}</div></div>` : ""}
+      ${a.afirmaciones.map((f, i) => afirmacionHtml(a, f, i)).join("")}
+      <div class="toolbar no-print"><button class="btn" data-act="af-add">+ Afirmación suelta</button></div>`;
+  }
+
+  // ---------- ACR · Paso 8: informar, apoyar y cerrar ----------
+  function pasoCerrar(a) {
+    const inf = a.informacion;
+    return `<p class="page-lead">El análisis no termina con el informe: hay que <b>devolver las conclusiones</b> a los profesionales implicados y al paciente o su familia, <b>apoyar</b> a quien lo necesite y dejar fecha para <b>comprobar que las acciones funcionan</b>.</p>
+      ${facil(`<p>En el caso de la sepsis, el equipo explicó las conclusiones a los profesionales implicados y el jefe de servicio se reunió con la familia de la paciente para contarles qué ocurrió y qué se ha cambiado. La supervisora apoyó a la enfermera del triaje durante el análisis: los profesionales implicados son también víctimas del incidente.</p><p>El Ministerio de Sanidad recomienda que el informe final se conserve <b>anonimizado</b> (sin datos del paciente ni de los profesionales) y que el centro tenga un procedimiento para informar al paciente y a la familia.</p>`)}
+      <div data-zona="avisos">${avisosGenerales(a, pasoActual)}</div>
+      <div class="card"><h3 class="sub-h">Información</h3>
+        ${campo(inf, "profesionales", "A los profesionales implicados y a la unidad", { bind: `data-k="informacion.profesionales"`, ph: "Cuándo y quién: sesión del servicio el 10/02, responsable de seguridad" })}
+        ${campo(inf, "paciente", "Al paciente o a la familia", { bind: `data-k="informacion.paciente"`, ph: "Cuándo y quién: reunión con la familia el 12/02, jefe de servicio" })}
+        <div class="grid-2">${campo(inf, "direccion", "A la dirección", { bind: `data-k="informacion.direccion"`, opt: true })}${campo(inf, "comision", "A la comisión de seguridad", { bind: `data-k="informacion.comision"`, opt: true })}</div>
+      </div>
+      <div class="card"><h3 class="sub-h">Apoyo</h3>
+        <div class="chips">${[["paciente", "Al paciente y a la familia"], ["profesionales", "A los profesionales implicados (segundas víctimas)"]].map(([k, t]) => `<button type="button" class="chip${a.apoyo[k] ? " active" : ""}" data-kchk="apoyo.${k}">${a.apoyo[k] ? "✓ " : ""}${t}</button>`).join("")}</div>
+        ${campo(a.apoyo, "nota", "Cómo", { bind: `data-k="apoyo.nota"`, area: true, opt: true, ph: "Quién acompañó, qué se ofreció" })}
+      </div>
+      <div class="card"><h3 class="sub-h">Conclusiones</h3>
+        ${campo(a, "conclusiones", "Conclusiones del análisis", { area: true, rows: 5 })}
+        <button type="button" class="link-btn" data-act="concl-sug">Proponer unas conclusiones</button>
+        ${campo(a, "proxRevision", "Fecha para revisar si las acciones funcionan", { tipo: "date" })}
+      </div>
+      <div class="card"><h3 class="sub-h">Lista de verificación antes de cerrar</h3>
+        ${L.VERIFICACION.map(v => `<label class="chk chk--lista"><input type="checkbox" data-act="verif" data-id="${v.id}"${a.verificacion.includes(v.id) ? " checked" : ""} /> ${esc(v.t)}</label>`).join("")}
+      </div>
+      <div class="card export-card"><h3 class="sub-h">El informe del análisis causa raíz</h3>
+        <p class="field-sub">Incidente y decisión, equipo y método, cronología, problemas en la atención, espinas (con sus dibujos), afirmaciones causales, plan de acción y medida, información y apoyo, conclusiones y lista de verificación. En Word con las imágenes, en PDF y en Excel.</p>
+        <div class="toolbar"><button class="btn btn--primary" data-act="ver-ficha">👁 Ver e imprimir (PDF)</button><button class="btn" data-act="doc-word">⬇ Word</button><button class="btn" data-act="excel">⬇ Excel</button></div>
+      </div>`;
+  }
+  const RENDER = { problema: pasoProblema, espina: pasoEspina, elegir: a => pasoElegir(a, false), acciones: pasoAcciones, decidir: pasoDecidir, equipo: pasoEquipo, cronologia: pasoCronologia, afirmaciones: pasoAfirmaciones, cerrar: pasoCerrar };
 
   // Las espinas se pintan como texto SVG; aquí solo se recuerda la vista
   function pintarEspinas() { /* el SVG ya va dentro del HTML */ }
@@ -510,8 +575,9 @@
       if (b.t === "portada") return `<div class="doc-portada"><h1>${esc(b.titulo)}</h1>${b.sub ? `<p class="doc-sub">${esc(b.sub)}</p>` : ""}${(b.extra || []).filter(lleno).map(x => `<p>${esc(x)}</p>`).join("")}</div>`;
       if (b.t === "h1") return `<h2 class="doc-h1">${esc(b.texto)}</h2>`;
       if (b.t === "h2") return `<h3 class="doc-h2">${esc(b.texto)}</h3>`;
+      if (b.t === "lista") return `<ul class="doc-ul">${b.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`;
       if (b.t === "p") return `<p class="doc-p${b.estilo === "nota" ? " doc-nota" : ""}">${b.runs ? b.runs.map(r => r.negrita ? `<b>${escMl(r.texto)}</b>` : escMl(r.texto)).join("") : escMl(b.texto)}</p>`;
-      if (b.t === "espina") return `<div class="esp-graf esp-graf--doc">${espinaHtml(a)}</div>`;
+      if (b.t === "espina") { const g = espinaActual; espinaActual = b.espina || ""; const h = `<div class="esp-graf esp-graf--doc">${espinaHtml(a)}</div>`; espinaActual = g; return h; }
       if (b.t === "tabla") {
         const suma = (b.anchos || []).reduce((s, x) => s + x, 0);
         const cols = b.anchos ? `<colgroup>${b.anchos.map(w => `<col style="width:${(w / suma * 100).toFixed(1)}%">`).join("")}</colgroup>` : "";
@@ -520,8 +586,9 @@
       return "";
     }).join("");
   }
+  const documentoDe = (a, imagenes) => a.tipo === "acr" ? L.documentoInforme(a, new Date().toLocaleDateString("es-ES"), imagenes) : L.documentoFicha(a, new Date().toLocaleDateString("es-ES"), imagenes ? imagenes[""] : null);
   function renderFicha(a) {
-    const doc = L.documentoFicha(a, new Date().toLocaleDateString("es-ES"), null);
+    const doc = documentoDe(a, null);
     view.innerHTML = `<div class="informe-bar informe-only"><button class="btn" data-act="volver">← Volver</button><span class="informe-acc"><button class="btn" data-act="doc-word">⬇ Word</button><button class="btn btn--primary" data-act="imprimir">Guardar / imprimir</button></span></div>
       <div class="doc-prev doc-prev--informe">${bloquesHtml(doc.bloques, a)}</div>${informePie()}`;
   }
@@ -532,7 +599,7 @@
     const b = base || ((actual && actual.tipo === "acr" ? "ACR " : "Ishikawa ") + L.corto(actual ? (actual.titulo || actual.problema) : "", 60));
     return `${b.replace(/[\\/:*?"<>|%…]/g, "").trim()} ${fechaArchivo()}.${ext}`;
   }
-  const svgExport = a => { const d = L.datosDibujo(a, { porques: vista.porques, soloElegidas: vista.solo }); return D.svg(D.colocar(d, { titulo: a.titulo ? "Ishikawa · " + a.titulo : "Diagrama de Ishikawa", pie: "Elaborado con ACR · Ishikawa" })); };
+  const svgExport = (a, esp) => { const e = esp === undefined ? espinaActual : esp, pa = a.problemasAtencion.find(p => p.id === e); const d = L.datosDibujo(a, { porques: vista.porques, soloElegidas: vista.solo, espina: e }); return D.svg(D.colocar(d, { titulo: pa ? "Ishikawa · " + L.corto(pa.texto, 70) : a.titulo ? "Ishikawa · " + a.titulo : "Diagrama de Ishikawa", pie: "Elaborado con ACR · Ishikawa" })); };
   // SVG → PNG (3 veces el tamaño, sin pasar del lienzo máximo del móvil)
   function pngDe(s, maxPx = 16e6, k0 = 3) {
     return new Promise((ok, mal) => {
@@ -567,8 +634,9 @@
   async function descargarWord(a) {
     toast("Preparando el Word…");
     try {
-      const s = svgExport(a), r = await pngDe(s, 12e6, 2);
-      const doc = L.documentoFicha(a, new Date().toLocaleDateString("es-ES"), { png: new Uint8Array(await r.blob.arrayBuffer()), w: r.w, h: r.h });
+      const imagenes = {};
+      for (const e of L.espinasDe(a)) { if (e.id && !L.causasCon(a).some(x => x.espina === e.id)) continue; const r = await pngDe(svgExport(a, e.id), 12e6, 2); imagenes[e.id] = { png: new Uint8Array(await r.blob.arrayBuffer()), w: r.w, h: r.h }; }
+      const doc = documentoDe(a, imagenes);
       const bytes = window.Docx.construirDocx(Object.assign({ pie: doc.titulo + " · Generado con la app ACR · Ishikawa", horizontal: true }, doc));
       compartirOBajar(new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }), nombreArchivo("docx"), "Word descargado. Ábrelo con Word, Pages o LibreOffice y ajústalo a tu gusto.");
     } catch (e) { toast("No se ha podido crear el Word.", 4000); }
@@ -591,6 +659,7 @@
     if (o.causa) { const x = a.causas.find(y => y.id === o.causa), z = $(`[data-zcau="${o.causa}"]`); if (x && z) z.innerHTML = L.avisosCausa(a, Object.assign({}, x, { elegida: false })).map(avisoHtml).join(""); }
     $$("[data-zac]").forEach(el => { el.innerHTML = L.avisosAcciones(a).filter(y => y.accion === el.dataset.zac).map(avisoHtml).join(""); });
     $$("[data-zona='sac']").forEach(el => { el.innerHTML = sacHtml(a); });
+    $$("[data-zaf]").forEach(el => { const f = a.afirmaciones.find(y => y.id === el.dataset.zaf); if (f) el.innerHTML = L.avisosAfirmacion(f).map(r => `<div class="warn">⚠ <b>Regla ${r.regla}.</b> ${esc(r.texto)}</div>`).join(""); });
     $$("[data-zmi]").forEach(el => { el.innerHTML = L.avisosEquipo(a).filter(x => x.miembro === el.dataset.zmi).map(avisoHtml).join(""); });
     $$("[data-zh]").forEach(el => { el.innerHTML = L.avisosCronologia(a).filter(x => x.hecho === el.dataset.zh).map(avisoHtml).join(""); });
     $$("[data-zfz]").forEach(el => { const x = a.acciones.find(y => y.id === el.dataset.zfz); if (x) el.innerHTML = fzBadge(L.fuerzaAccion(x), !x.categoria && L.fuerzaAccion(x)); });
@@ -652,10 +721,10 @@
       <p class="field-sub">Tras la auditoría de enero, el equipo de Urgencias quiere entender por qué no se reevalúa a los pacientes en la sala de espera. En una sesión de una hora, con la técnica de grupo nominal, escribe trece causas en las siete categorías. Preguntando «¿por qué?» en la espina de la organización llega a la causa de fondo: <i>la reevaluación no está asignada a ningún puesto; de noche, la misma enfermera cubre la sala y los boxes, y los boxes siempre ganan</i>. Los datos de la auditoría lo confirman.<!--[eco]--> Es el caso del capítulo 8 de la guía.<!--[/eco]--></p>
       <div class="ej-grid">${C.EJEMPLOS.fichas.map(f => `<a class="ej-card" href="${f.href}"><b>${esc(f.t)}</b><span>${esc(f.s)}</span></a>`).join("")}<a class="ej-card" href="#/analisis/ej-ish-sala/4?informe=1"><b>El informe</b><span>Todo en una vista imprimible</span></a></div>
       <h2 class="sec-t">Análisis causa raíz: la paciente de la sala de espera</h2>
-      <p class="field-sub">Unas semanas antes de la auditoría había ocurrido un evento adverso: una paciente de 82 años, triada con prioridad 3, empeoró en la sala de espera y, cuando la llamaron a consulta casi tres horas después, tenía una sepsis grave e ingresó en la UCI. Se notificó y la dirección decidió hacer un ACR. Aquí, los pasos 1 a 5: la decisión, el equipo formado en 72 horas, la cronología y una espina por cada problema en la atención.<!--[eco]--> Es el caso del capítulo 8 de la guía.<!--[/eco]--></p>
+      <p class="field-sub">Unas semanas antes de la auditoría había ocurrido un evento adverso: una paciente de 82 años, triada con prioridad 3, empeoró en la sala de espera y, cuando la llamaron a consulta casi tres horas después, tenía una sepsis grave e ingresó en la UCI. Se notificó y la dirección decidió hacer un ACR. Los ocho pasos: la decisión, el equipo formado en 72 horas, la cronología, una espina por cada problema en la atención, las tres afirmaciones causales, las acciones con su indicador y la información a la familia.<!--[eco]--> Es el caso del capítulo 8 de la guía.<!--[/eco]--></p>
       <div class="ej-grid">${C.EJEMPLOS.fichasAcr.map(f => `<a class="ej-card" href="${f.href}"><b>${esc(f.t)}</b><span>${esc(f.s)}</span></a>`).join("")}</div>
       <h2 class="sec-t">Próximamente</h2>
-      <p class="field-sub">Las afirmaciones causales, las acciones y la información a la familia del caso de la sepsis, y seis minicasos para practicar.</p>
+      <p class="field-sub">Seis minicasos para practicar y las conexiones con las demás apps.</p>
       ${practica("El caso de Urgencias es ficticio. Adapta siempre las causas y las acciones a tu unidad.")}`;
   }
 
@@ -977,6 +1046,7 @@
       if (f === "categoria") { repintar(); return; }
       refrescar(); return;
     }
+    if (t.dataset.af) { const x = buscaEn(a.afirmaciones, t.dataset.af); if (!x) return; setPath(x, f, t.value); tocado(a); refrescar({ afirmacion: x.id }); return; }
     const simple = [["m", a.equipo], ["e", a.entrevistas], ["r", a.reuniones], ["h", a.cronologia], ["p", a.problemasAtencion]].find(([d]) => t.dataset[d]);
     if (simple) { const x = buscaEn(simple[1], t.dataset[simple[0]]); if (!x) return; setPath(x, f, t.value); tocado(a); if (t.tagName === "SELECT") repintar(); else refrescar(); return; }
     if (t.dataset.k) { setPath(a, t.dataset.k, t.value); tocado(a); if (t.tagName === "SELECT") repintar(); else refrescar(); }
@@ -994,7 +1064,7 @@
     const t = e.target; let b;
     if ((b = t.closest(".info-btn"))) { const h = $("#help-" + b.dataset.info); if (!h) return; const open = h.hidden; h.hidden = !open; b.setAttribute("aria-expanded", String(open)); return; }
     const a = actual;
-    if ((b = t.closest("[data-acpick]")) && a) { const x = buscaEn(a.acciones, b.dataset.acpick); if (!x) return; x[b.dataset.f] = b.dataset.v; tocado(a); repintar(); return; }
+    if ((b = t.closest("[data-acpick]")) && a) { const x = buscaEn(a.acciones, b.dataset.acpick); if (!x) return; setPath(x, b.dataset.f, getPath(x, b.dataset.f) === b.dataset.v && b.dataset.f !== "estado" ? "" : b.dataset.v); tocado(a); repintar(); return; }
     if ((b = t.closest("[data-acc]")) && a) {
       const x = buscaEn(a.acciones, b.dataset.acc); if (!x) return;
       const i = x.causas.indexOf(b.dataset.c); if (i < 0) x.causas.push(b.dataset.c); else x.causas.splice(i, 1);
@@ -1023,6 +1093,11 @@
     else if (act === "pa-add" && a) { a.problemasAtencion.push(L.nuevoProblemaAt(genId())); tocado(a); repintar(); }
     else if (act === "pa-del" && a) { const x = buscaEn(a.problemasAtencion, id); if (!x) return; const n = a.causas.filter(c => c.espina === id && lleno(c.texto)).length; const hacer = () => { a.problemasAtencion = a.problemasAtencion.filter(y => y.id !== id); a.causas.forEach(c => { if (c.espina === id) c.espina = ""; }); if (espinaActual === id) espinaActual = ""; tocado(a); repintar(); }; if (n) confirmar(`<p>Se quitará el problema «${esc(L.corto(x.texto, 60))}». Sus ${plural(n, "causa pasa", "causas pasan")} a la espina principal.</p>`, "Quitar", hacer); else hacer(); }
     else if (act === "espina-sel") { espinaActual = id || ""; repintar(); }
+    else if (act === "af-add" && a) { const f = Object.assign(L.nuevaAfirmacion(genId()), { causaId: id || "" }); const x = a.causas.find(c => c.id === id); if (x) f.texto = L.afirmacionSugerida(a, x); a.afirmaciones.push(f); tocado(a); repintar(); const el = $(`[data-af="${f.id}"][data-f="texto"]`); if (el) { el.focus(); el.scrollIntoView({ block: "center" }); } }
+    else if (act === "af-del" && a) { const f = buscaEn(a.afirmaciones, id); if (!f) return; const hacer = () => { a.afirmaciones = a.afirmaciones.filter(y => y.id !== id); tocado(a); repintar(); }; if (lleno(f.texto)) confirmar(`<p>Se quitará la afirmación «${esc(L.corto(f.texto, 70))}».</p>`, "Quitar", hacer); else hacer(); }
+    else if (act === "af-sug" && a) { const f = buscaEn(a.afirmaciones, id), x = f && a.causas.find(c => c.id === f.causaId); if (!x) return; const hacer = () => { f.texto = L.afirmacionSugerida(a, x); tocado(a); repintar(); }; if (lleno(f.texto)) confirmar("<p>Se sustituirá el texto de la afirmación por la propuesta.</p>", "Sustituir", hacer, { peligro: false }); else hacer(); }
+    else if (act === "concl-sug" && a) { const hacer = () => { a.conclusiones = L.conclusionesSugeridas(a); tocado(a); repintar(); }; if (lleno(a.conclusiones)) confirmar("<p>Se sustituirán las conclusiones que has escrito por la propuesta.</p>", "Sustituir", hacer, { peligro: false }); else hacer(); }
+    else if (act === "verif" && a) { const i = a.verificacion.indexOf(id); if (b.checked && i < 0) a.verificacion.push(id); if (!b.checked && i >= 0) a.verificacion.splice(i, 1); tocado(a); }
     else if (act === "preg" && a) { L.responder(a, id, L.respuesta(a, id) === b.dataset.v ? "" : b.dataset.v); tocado(a); repintar(); }
     else if (act === "preg-causa" && a) { const q = C.PREGUNTAS.find(x => x.id === id); if (!q) return; const x = Object.assign(L.nuevaCausa(genId(), b.dataset.cat, espinaActual || ""), { texto: q.causa }); a.causas.push(x); tocado(a); repintar(); const el = $(`[data-ca="${x.id}"][data-f="texto"]`); if (el) { el.focus(); el.scrollIntoView({ block: "center" }); } }
     // --- Lista ---

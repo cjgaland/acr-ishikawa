@@ -216,7 +216,23 @@
       causa("ej-s11", "comunicacion", "El triaje no avisa a la sala de los pacientes de riesgo", { espina: "", votos: 4 })
     ],
     preguntas: [{ id: "q-equ2", r: "no" }, { id: "q-nor3", r: "no" }, { id: "q-equ3", r: "no" }, { id: "q-pac1", r: "no" }, { id: "q-com1", r: "si" }, { id: "q-bar1", r: "no" }, { id: "q-fat1", r: "no" }, { id: "q-ent1", r: "no" }],
-    acciones: [],
+    afirmaciones: [
+      { id: "ej-f1", causaId: "ej-s01", texto: "Como el programa de triaje permitía cerrar sin la temperatura, la alerta de sepsis no se activó y la paciente recibió una prioridad menor de la que correspondía.", deber: "", pruebas: "Registro del triaje sin temperatura; comprobación con informática de que ningún campo es obligatorio." },
+      { id: "ej-f2", causaId: "ej-s05", texto: "Como la reevaluación de la sala de espera no estaba asignada a ningún puesto en el turno de noche, el deterioro de la paciente no se detectó durante tres horas.", deber: "Protocolo de sala de espera, apartado 3 (reevaluación cada 90 minutos)", pruebas: "Auditoría de enero (5 de 7 incumplimientos de noche); entrevistas a las dos enfermeras del turno; observación de dos noches." },
+      { id: "ej-f3", causaId: "ej-s08", texto: "Como la paciente no tenía acompañante y no podía avisar por sí misma, nadie alertó del empeoramiento.", deber: "", pruebas: "Entrevistas al celador y a la familia; el triaje no registra si el paciente viene solo." }
+    ],
+    acciones: [
+      { id: "ej-x1", que: "Hacer obligatorias las cuatro constantes para cerrar el triaje: el programa no deja cerrar sin ellas (función forzada).", categoria: "forzada", causas: ["ej-s01"], responsable: "Jefe de servicio de Urgencias, con Informática", plazo: "2027-03-15", estado: "curso", controla: "servicio", direccion: "si", motivoDireccion: "",
+        indicador: { nombre: "% de triajes con las cuatro constantes registradas", numerador: "Triajes con tensión, frecuencia cardiaca, saturación y temperatura registradas", denominador: "Todos los triajes del mes (dato del sistema)", esperado: "≥ 95 %", fecha: "2027-05-15", tipo: "sehace", resultado: "", alcanzado: "" }, nota: "Es la misma acción que el AMFE había propuesto para el fallo nº 10: el análisis proactivo y el reactivo llegaron al mismo punto débil." },
+      { id: "ej-x2", que: "Asignar la reevaluación de la sala de espera a un puesto en cada turno, también de noche, con aviso automático en la pantalla de la sala a los 90 minutos.", categoria: "programa", causas: ["ej-s05"], responsable: "Supervisión de enfermería de Urgencias", plazo: "2027-03-01", estado: "curso", controla: "equipo", direccion: "si", motivoDireccion: "",
+        indicador: { nombre: "% de pacientes en espera reevaluados dentro de los 90 minutos", numerador: "Pacientes con espera de más de 90 minutos y reevaluación registrada en plazo", denominador: "Pacientes con espera de más de 90 minutos (muestra de 25 historias)", esperado: "≥ 90 %", fecha: "2027-05-15", tipo: "funciona", resultado: "", alcanzado: "" }, nota: "" },
+      { id: "ej-x3", que: "Identificar en el triaje a los pacientes mayores sin acompañante (cribado de fragilidad) y marcarlos en la pantalla de la sala para vigilarlos más.", categoria: "documentacion", causas: ["ej-s08"], responsable: "Supervisión de enfermería de Urgencias", plazo: "2027-03-15", estado: "pendiente", controla: "equipo", direccion: "si", motivoDireccion: "",
+        indicador: { nombre: "% de mayores de 75 años con cribado de fragilidad en el triaje", numerador: "Mayores de 75 con cribado registrado", denominador: "Mayores de 75 triados (muestra)", esperado: "≥ 90 %", fecha: "2027-05-15", tipo: "sehace", resultado: "", alcanzado: "" }, nota: "" }
+    ],
+    informacion: { profesionales: "Sesión del servicio el 10 de febrero, por la responsable de seguridad; los cinco profesionales entrevistados, antes y en privado.", paciente: "El jefe de servicio habló con la familia al día siguiente del incidente y volvió a reunirse con ellos un mes después para contarles las conclusiones y lo que se ha cambiado.", direccion: "Informe a la dirección el 8 de febrero.", comision: "Comisión de seguridad del 15 de febrero, que hace el seguimiento de las acciones.", nota: "" },
+    apoyo: { paciente: true, profesionales: true, nota: "La supervisora acompañó a la enfermera del triaje durante todo el análisis." },
+    conclusiones: "El análisis de este evento adverso no encontró un culpable, sino tres factores del sistema que lo hicieron posible: un programa que permitía cerrar el triaje sin la temperatura, una reevaluación de la sala de espera sin responsable en el turno de noche y una paciente mayor y sola de la que nadie sabía que esperaba sin acompañante. Se proponen tres acciones (una fuerte y dos intermedias), con responsable, plazo e indicador; la primera coincide con la que el AMFE del servicio había propuesto por su cuenta. Las conclusiones se han compartido con los profesionales implicados y con la familia, y la comisión de seguridad revisará los indicadores en mayo.",
+    proxRevision: "2027-05-15", verificacion: ["v-equipo", "v-72", "v-hechos", "v-reglas", "v-fuerte", "v-medida", "v-direccion", "v-familia", "v-prof", "v-apoyo", "v-anon", "v-seguimiento"],
     notas: "Caso ficticio. Equipo formado en las primeras 72 horas; ninguno estaba de guardia aquella noche.",
     creado: "2027-01-13T10:00:00.000Z", modificado: "2027-02-05T12:00:00.000Z"
   };
@@ -233,7 +249,11 @@
       { t: "2. El problema", s: "Qué pasó, en una frase", href: "#/analisis/ej-acr-sepsis/2" },
       { t: "3. Equipo y plazos", s: "Cinco perfiles, cinco entrevistas, tres reuniones", href: "#/analisis/ej-acr-sepsis/3" },
       { t: "4. La cronología", s: "Lo que pasó frente a lo que debía pasar", href: "#/analisis/ej-acr-sepsis/4" },
-      { t: "5. Las espinas", s: "Una por cada problema en la atención", href: "#/analisis/ej-acr-sepsis/5" }
+      { t: "5. Las espinas", s: "Una por cada problema en la atención", href: "#/analisis/ej-acr-sepsis/5" },
+      { t: "6. Afirmaciones causales", s: "Las tres del caso, con las cinco reglas", href: "#/analisis/ej-acr-sepsis/6" },
+      { t: "7. Acciones y medida", s: "Una fuerte y dos intermedias, con su indicador", href: "#/analisis/ej-acr-sepsis/7" },
+      { t: "8. Informar y cerrar", s: "Profesionales, familia, apoyo y conclusiones", href: "#/analisis/ej-acr-sepsis/8" },
+      { t: "El informe", s: "Todo en una vista imprimible", href: "#/analisis/ej-acr-sepsis/8?informe=1" }
     ]
   };
 
