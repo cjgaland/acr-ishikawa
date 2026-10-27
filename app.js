@@ -15,8 +15,12 @@
   // ---------- Versión y novedades ----------
   // Al publicar cambios: añadir una entrada AL PRINCIPIO de NOVEDADES, poner su versión en los ?v= de index.html, en
   // APP_VERSION y subir CACHE_NAME en sw.js. Formato de versión: AAAA.NN.
-  const APP_VERSION = "2026.04";
+  const APP_VERSION = "2026.05";
   const NOVEDADES = [
+    { version: "2026.05", fecha: "Octubre 2026", titulo: "Publicada", cambios: [
+      "Primera versión publicada, con el Ishikawa y el análisis causa raíz completos.",
+      "Textos repasados: la portada, la bienvenida y «Acerca de» ya describen la app entera."
+    ] },
     { version: "2026.04", fecha: "Octubre 2026", titulo: "Conexiones, Aprende completo, ejercicios y minicasos", cambios: [
       /*[eco]*/"«Traer de» AMFE o Mapa de Riesgos (un fallo con su causa, sus acciones y, desde la copia de AMFE, su Ishikawa), de Rondas de Seguridad (lo que falla una y otra vez), de Flujograma (los pasos como «lo que debería haber pasado») y de Indicadores y Lectura Crítica (el indicador y la evidencia de una acción).",/*[/eco]*/
       /*[ind] "Cargar el archivo de copia de AMFE, Mapa de Riesgos, Rondas de Seguridad, Flujograma, Indicadores o Lectura Crítica para empezar desde sus datos.", [/ind]*/
@@ -172,7 +176,7 @@
       <h2 class="sec-t">¿Qué quieres hacer?</h2>
       <div class="puertas">
         <a class="puerta" href="#/nuevo/ishikawa"><span class="puerta-ico" aria-hidden="true">🐟</span><b>Buscar las causas de un problema</b><span>Un diagrama de Ishikawa en equipo, en una hora: el problema, la espina, los «¿por qué?», las causas de fondo y las acciones.</span><span class="puerta-ej">Ejemplo: «En 7 de 25 episodios con esperas de más de 90 minutos no consta la reevaluación».</span></a>
-        <a class="puerta puerta--acr" href="#/nuevo/acr"><span class="puerta-ico" aria-hidden="true">🔎</span><b>Analizar un incidente</b><span>El análisis causa raíz de un evento adverso o de un casi incidente grave, con el método del RCA² y del Protocolo de Londres.</span><span class="puerta-ej">Ejemplo: una paciente que empeora en la sala de espera y llega a la consulta con una sepsis grave.</span><span class="puerta-prox">Hoy: el problema, la espina y las acciones. El resto de pasos, en las próximas versiones.</span></a>
+        <a class="puerta puerta--acr" href="#/nuevo/acr"><span class="puerta-ico" aria-hidden="true">🔎</span><b>Analizar un incidente</b><span>El análisis causa raíz de un evento adverso o de un casi incidente grave, con el método del RCA² y del Protocolo de Londres.</span><span class="puerta-ej">Ejemplo: una paciente que empeora en la sala de espera y llega a la consulta con una sepsis grave.</span></a>
       </div>
       <details class="facil cual"><summary>¿Cuál necesito?</summary><div class="facil-body">
         <p><b>¿Le ha pasado algo concreto a un paciente</b> (o ha estado a punto)? Entonces es un <b>incidente</b>. Si causó un daño grave o pudo causarlo, y es un riesgo que puede repetirse, toca un <b>análisis causa raíz</b>: el SiNASP lo propone para los de riesgo extremo (SAC 1) y una versión simplificada para los de riesgo alto (SAC 2). Los de riesgo medio o bajo se analizan juntos, con otros parecidos.</p>

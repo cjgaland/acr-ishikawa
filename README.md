@@ -9,11 +9,14 @@ Buscar las causas de un problema (diagrama de Ishikawa), en cuatro pasos:
 3. Elegir y comprobar con datos las causas de fondo (con votos).
 4. Acciones con su fuerza (jerarquía del informe RCA²), responsable, plazo e indicador.
 
-- Cuatro juegos de categorías: las siete de la guía, el Protocolo de Londres 2024, SEIPS y las 6M, y uno propio.
+- Cinco juegos de categorías: las siete de la guía, los siete niveles de Vincent y del Protocolo de Londres, el Protocolo de Londres 2024, SEIPS y las 6M, y uno propio.
 - La espina, lista para pegar: copiarla como imagen, PNG de alta resolución, SVG y plantilla en blanco.
 - Ficha del análisis en Word, PDF y Excel, con la espina dentro.
-- Aprende, Ponte a prueba, glosario y el ejemplo de la sala de espera de Urgencias (ficticio).
-- El análisis causa raíz completo de un incidente llega en las próximas versiones.
+- **Analizar un incidente** (análisis causa raíz, ocho pasos): matriz de riesgo SAC del SiNASP, equipo y plazos, cronología frente a lo que debería haber pasado, una espina por cada problema en la atención, afirmaciones causales con las cinco reglas, acciones con su medida, información y apoyo, e informe en Word, PDF y Excel.
+- Trae datos de AMFE, Mapa de Riesgos, Rondas de Seguridad, Flujograma, Indicadores y Lectura Crítica.
+- Aprende (ocho temas), Ponte a prueba (veinte preguntas y dos ejercicios), glosario, dos ejemplos completos y seis minicasos.
+
+Web: https://cjgaland.github.io/acr-ishikawa/
 
 Acompaña al capítulo 8 de la *Guía de Calidad y Seguridad del Paciente* de los autores. Los datos se guardan solo en el dispositivo.
 
