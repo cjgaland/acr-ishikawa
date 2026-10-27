@@ -19,7 +19,7 @@
   const NOVEDADES = [
     { version: "2026.01", fecha: "Octubre 2026", titulo: "Primera versión: el Ishikawa", cambios: [
       "Buscar las causas de un problema en cuatro pasos: el problema como un hecho medible, la espina de pescado con sus «¿por qué?», elegir y comprobar las causas de fondo, y acciones con su fuerza, responsable, plazo e indicador.",
-      "Cuatro juegos de categorías: las siete de la guía, el Protocolo de Londres 2024, SEIPS y las 6M; y uno propio. Al cambiar de juego, la app propone a qué categoría va cada causa.",
+      "Cinco juegos de categorías: las siete de la guía, los siete niveles de Vincent y del Protocolo de Londres, el Protocolo de Londres 2024, SEIPS y las 6M; y uno propio. Al cambiar de juego, la app propone a qué categoría va cada causa.",
       "La espina, lista para pegar: copiarla como imagen, descargarla en PNG de alta resolución o en SVG, y una plantilla en blanco para la reunión con pósits.",
       "Ficha del análisis en Word, PDF y Excel, con la espina dentro.",
       "Ejemplo: la reevaluación en la sala de espera de Urgencias (caso ficticio). Y tres temas de Aprende, glosario y cinco preguntas para ponerte a prueba.",

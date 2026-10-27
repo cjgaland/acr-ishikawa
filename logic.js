@@ -51,7 +51,17 @@
         { k: "entorno", nom: "Entorno", eq: "entorno", que: "¿Espacio, ruido, luz, distancias, interrupciones?" },
         { k: "paciente", nom: "Paciente", eq: "paciente", que: "¿Edad, gravedad, capacidad de comunicarse, acompañamiento?" }
       ] },
-    londres: { nom: "Protocolo de Londres 2024", corto: "Londres", que: "Los ocho niveles de factores contribuyentes de la edición de 2024 del Protocolo de Londres. Para el análisis de un incidente clínico.",
+    vincent: { nom: "Vincent y Protocolo de Londres (7 niveles)", corto: "Vincent", que: "Los siete niveles de factores contribuyentes de Vincent y colaboradores (BMJ, 1998), base del Protocolo de Londres de 2004. Para analizar un incidente clínico mirando todo el sistema.",
+      cats: [
+        { k: "paciente", nom: "Paciente", eq: "paciente", que: "Estado (complejidad y gravedad), idioma y comunicación, personalidad y factores sociales." },
+        { k: "tarea", nom: "Tarea", eq: "tarea", que: "Diseño de la tarea y claridad de su estructura, protocolos disponibles y usados, pruebas disponibles y fiables." },
+        { k: "profesional", nom: "Profesional", eq: "persona", que: "Conocimientos y habilidades, motivación, salud física y mental." },
+        { k: "equipo", nom: "Equipo", eq: "equipo", que: "Comunicación oral y escrita, supervisión y pedir ayuda, estructura del equipo." },
+        { k: "entorno", nom: "Entorno de trabajo", eq: "entorno", que: "Plantilla y combinación de perfiles, carga y turnos, equipos (diseño, disponibilidad, mantenimiento), apoyo administrativo y de gestión." },
+        { k: "organizacion", nom: "Organización y gestión", eq: "organizacion", que: "Recursos y límites económicos, estructura de la organización, políticas, normas y objetivos, cultura de seguridad y prioridades." },
+        { k: "contexto", nom: "Contexto institucional", eq: "contexto", que: "Contexto económico y normativo, servicio de salud, relación con otras organizaciones." }
+      ] },
+    londres: { nom: "Protocolo de Londres 2024 (8 niveles)", corto: "Londres 2024", que: "Los ocho niveles de la edición de 2024 del Protocolo de Londres: los siete de Vincent, con la información y la tecnología aparte y la cultura junto a la organización.",
       cats: [
         { k: "paciente", nom: "Paciente", eq: "paciente", que: "Enfermedad (complejidad y gravedad), idioma y comunicación, personalidad y factores sociales." },
         { k: "profesional", nom: "Profesional", eq: "persona", que: "Conocimientos y habilidades, competencia, salud física y mental, valores y conducta profesional." },
@@ -67,8 +77,8 @@
         { k: "persona", nom: "Persona(s)", eq: "persona", que: "Quien hace el trabajo (profesionales, paciente, familia): capacidades, formación, experiencia, cansancio, salud." },
         { k: "tareas", nom: "Tareas", eq: "tarea", que: "Qué hay que hacer: dificultad, complejidad, variedad, tiempo, interrupciones." },
         { k: "herramientas", nom: "Herramientas y tecnología", eq: "tecnologia", que: "Aparatos, programas, material: ¿están, funcionan, son fáciles de usar?" },
-        { k: "entornoInt", nom: "Entorno interno", eq: "entorno", que: "Espacio, distribución, luz, ruido, temperatura." },
-        { k: "organizacion", nom: "Organización", eq: "organizacion", que: "Turnos, plantilla, trabajo en equipo, cultura, supervisión, formación." },
+        { k: "entornoInt", nom: "Entorno físico", eq: "entorno", que: "Espacio, distribución, luz, ruido, temperatura." },
+        { k: "organizacion", nom: "Condiciones de la organización", eq: "organizacion", que: "Turnos, plantilla, trabajo en equipo, cultura, supervisión, formación." },
         { k: "entornoExt", nom: "Entorno externo", eq: "contexto", que: "Normas, financiación, presión social y política, otras organizaciones." }
       ] },
     m6: { nom: "Las 6M (procesos no clínicos)", corto: "6M", que: "Las seis M clásicas de la industria. Para procesos de soporte: almacén, lavandería, citación, mantenimiento.",

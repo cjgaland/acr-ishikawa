@@ -14,9 +14,11 @@ const conCausas = (lista, o = {}) => { const a = nuevo(o); lista.forEach(([cat, 
 
 // ---------- Plantillas ----------
 prueba("las siete de la guía son las del capítulo 8", () => igual(L.PLANTILLAS.guia.cats.map(c => c.nom), ["Personal", "Procedimiento", "Organización", "Comunicación", "Equipamiento", "Entorno", "Paciente"]));
+prueba("Vincent: los siete niveles con los nombres de la guía", () => igual(L.PLANTILLAS.vincent.cats.map(c => c.nom), ["Paciente", "Tarea", "Profesional", "Equipo", "Entorno de trabajo", "Organización y gestión", "Contexto institucional"]));
 prueba("Londres 2024 tiene ocho niveles", () => igual(L.PLANTILLAS.londres.cats.length, 8));
 prueba("SEIPS seis elementos y 6M seis", () => { igual(L.PLANTILLAS.seips.cats.length, 6); igual(L.PLANTILLAS.m6.cats.length, 6); });
 prueba("cada categoría tiene una idea común conocida", () => Object.values(L.PLANTILLAS).forEach(p => p.cats.forEach(c => si(["persona", "paciente", "tarea", "equipo", "entorno", "tecnologia", "organizacion", "contexto", "material", "medicion"].includes(c.eq), c.k))));
+prueba("equivalencias guía → Vincent", () => { igual(L.equivalencia("guia", "personal", "vincent"), "profesional"); igual(L.equivalencia("guia", "equipamiento", "vincent"), "entorno"); igual(L.equivalencia("vincent", "contexto", "londres"), "contexto"); });
 prueba("equivalencias guía → Londres", () => {
   igual(L.equivalencia("guia", "personal", "londres"), "profesional");
   igual(L.equivalencia("guia", "procedimiento", "londres"), "tarea");
