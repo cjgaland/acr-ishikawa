@@ -203,6 +203,60 @@ prueba("lineas: no pasa del ancho y corta palabras muy largas", () => {
   const l = D.lineas("palabra ".repeat(20) + "x".repeat(80), 13, 200); si(l.every(s => s.length <= Math.floor(200 / (13 * 0.56))));
 });
 
+
+// ---------- ACR: decidir, plazos, equipo, cronología, espinas ----------
+prueba("plazos del RCA²: 72 h y 30–45 días desde la decisión", () => {
+  const a = nuevo({ tipo: "acr" }); a.incidente.fecha = "2027-01-12"; a.incidente.fechaDecision = "2027-01-13";
+  const P = L.plazos(a, "2027-01-14"); igual([P.empezar, P.fin30, P.fin45, P.tarde], ["2027-01-16", "2027-02-12", "2027-02-27", false]);
+  a.reuniones.push(Object.assign(L.nuevaReunion("r"), { fecha: "2027-01-20" })); si(L.plazos(a, "2027-01-14").tarde);
+  igual(L.plazos(nuevo(), "x"), null); igual(L.masDias("2027-01-31", 1), "2027-02-01");
+});
+prueba("avisos al decidir: riesgo bajo, conducta culpable, fechas", () => {
+  const a = nuevo({ tipo: "acr" }); Object.assign(a.incidente, { clase: "sindano", fecha: "2027-01-12", fechaDecision: "2027-01-10", gravedad: "7", frecuencia: "5", conducta: "si" });
+  const T = L.avisosDecidir(a, "2027-01-12").map(x => x.texto).join(" | ");
+  si(/no con un ACR completo/.test(T)); si(/no es para un ACR/.test(T)); si(/anterior a la del incidente/.test(T));
+  igual(L.nivelSAC(nuevo({ ambito: "otro" })), "");
+});
+prueba("avisos del equipo: tamaño, implicados y papeles", () => {
+  const a = nuevo({ tipo: "acr" }); a.equipo.push(Object.assign(L.nuevoMiembro("m1"), { perfil: "Enfermera de triaje", implicado: true }));
+  const T = L.avisosEquipo(a).map(x => x.texto).join(" | ");
+  si(/recomienda de 4 a 6/.test(T)); si(/estuvo implicado/.test(T)); si(/coordina/.test(T)); si(/representante de los pacientes/.test(T));
+  for (let i = 0; i < 7; i++) a.equipo.push(Object.assign(L.nuevoMiembro("x" + i), { perfil: "P" + i }));
+  si(L.avisosEquipo(a).some(x => /Con más de 6/.test(x.texto)));
+});
+prueba("cronología: desajustes sin problema, fuente y lo que salió bien", () => {
+  const a = nuevo({ tipo: "acr" }); ["a", "b", "c"].forEach(t => a.cronologia.push(Object.assign(L.nuevoHecho("h" + t), { hecho: t, desajuste: t === "b" })));
+  const T = L.avisosCronologia(a).map(x => x.texto).join(" | ");
+  si(/sin convertir/.test(T)); si(/Indica la fuente/.test(T)); si(/salió bien/.test(T));
+});
+prueba("espinas por problema en la atención y causas por espina", () => {
+  const a = nuevo({ tipo: "acr", problema: "P" }); a.problemasAtencion.push(Object.assign(L.nuevoProblemaAt("pa1"), { texto: "Problema 1" }));
+  a.causas.push(Object.assign(L.nuevaCausa("c1", "personal", "pa1"), { texto: "en la secundaria" }), Object.assign(L.nuevaCausa("c2", "personal", ""), { texto: "en la principal" }));
+  igual(L.espinasDe(a).map(e => e.id), ["", "pa1"]);
+  igual(L.causasDe(a, "personal", "").map(x => x.texto), ["en la principal"]); igual(L.causasDe(a, "personal", "pa1").length, 1); igual(L.causasDe(a, "personal").length, 2);
+  igual(L.datosDibujo(a, { espina: "pa1" }).problema, "Problema 1"); igual(L.datosDibujo(a, {}).categorias[0].causas.length, 1);
+  const s = L.sanearAnalisis(JSON.parse(JSON.stringify(a)), genId, "f"); igual(s.causas[0].espina, "pa1");
+  s.problemasAtencion = []; igual(L.sanearAnalisis(s, genId, "f").causas[0].espina, "");
+});
+prueba("preguntas desencadenantes: responder y categoría por idea común", () => {
+  const a = nuevo(); L.responder(a, "q-equ2", "no"); igual(L.respuesta(a, "q-equ2"), "no"); L.responder(a, "q-equ2", ""); igual(a.preguntas.length, 0);
+  igual(L.categoriaPorEq(a, "tecnologia"), "equipamiento"); igual(L.categoriaPorEq(a, "contexto"), "organizacion");
+  igual(L.categoriaPorEq(nuevo({ plantilla: "m6" }), "paciente"), "manoObra");
+  C.PREGUNTAS.forEach(q => si(L.categoriaPorEq(a, q.eq), q.id));
+});
+const ejAcr = L.sanearAnalisis(JSON.parse(JSON.stringify(C.EJEMPLOS.analisis[1])), genId, "x");
+prueba("el ejemplo del ACR de la sepsis: SAC 1, equipo en 72 h, cronología coherente con «tres horas»", () => {
+  igual(L.nivelSAC(ejAcr), "extremo"); igual(ejAcr.equipo.length, 5); si(ejAcr.equipo.every(m => !m.implicado));
+  const P = L.plazos(ejAcr, "2027-01-14"); igual(P.tarde, false); igual(P.primera, "2027-01-15");
+  igual(ejAcr.cronologia.length, 10); igual(ejAcr.cronologia.filter(h => h.desajuste).length, 3); igual(ejAcr.cronologia.filter(h => h.bien).length, 2);
+  igual(ejAcr.problemasAtencion.length, 2); igual(L.espinasDe(ejAcr).length, 3);
+  igual(L.causasDe(ejAcr, "organizacion", "ej-p2").length, 1); igual(L.elegidas(ejAcr).length, 3);
+  igual(L.progreso(ejAcr)[1], true); igual(L.progreso(ejAcr)[3], true); igual(L.progreso(ejAcr)[4], true); igual(L.progreso(ejAcr)[5], true);
+  si(!L.hayDatoPersonal(ejAcr)); si(!L.avisosDecidir(ejAcr, "2027-01-14").some(x => x.nivel === "warn"));
+  const p = L.paqueteIntercambio([ejAcr], "2026.02", "x").analisis[0]; igual(p.sac, 1); igual(p.problemasAtencion.length, 2); si(p.causas.some(c => c.espina));
+  [ "", "ej-p1", "ej-p2" ].forEach(e => igual(solapes(D.colocar(L.datosDibujo(ejAcr, { porques: true, espina: e }), {})), [], "espina " + e));
+});
+
 // ---------- Contenido ----------
 prueba("test: cinco preguntas del capítulo 8 con respuesta válida", () => { igual(C.TEST.length, 5); C.TEST.forEach(q => si(q.ok >= 0 && q.ok < q.o.length && C.TEMAS_TEST[q.t])); });
 prueba("glosario sin duplicados", () => { const k = C.GLOSARIO.map(g => g[0]); igual(new Set(k).size, k.length); });

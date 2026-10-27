@@ -138,7 +138,7 @@
       // Cronología (ACR)
       cronologia: [], problemasAtencion: [],
       // Espina
-      plantilla: "guia", categoriasPropias: Array(MAX_PROPIAS).fill(""), causas: [], efectoPrincipal: "",
+      plantilla: "guia", categoriasPropias: Array(MAX_PROPIAS).fill(""), causas: [], efectoPrincipal: "", preguntas: [],
       // Afirmaciones, acciones e información (ACR)
       afirmaciones: [], acciones: [],
       informacion: { profesionales: "", paciente: "", direccion: "", nota: "" }, apoyo: { paciente: false, profesionales: false, nota: "" },
@@ -146,7 +146,7 @@
       creado: fecha, modificado: fecha
     };
   }
-  function nuevaCausa(id, cat = "") { return { id, cat, texto: "", porques: Array(MAX_PORQUES).fill(""), votos: 0, elegida: false, comprobacion: "", prueba: "" }; }
+  function nuevaCausa(id, cat = "", espina = "") { return { id, cat, espina, texto: "", porques: Array(MAX_PORQUES).fill(""), votos: 0, elegida: false, comprobacion: "", prueba: "" }; }
   const nuevoIndicador = () => ({ nombre: "", numerador: "", denominador: "", esperado: "", fecha: "" });
   function nuevaAccion(id) { return { id, que: "", categoria: "", causas: [], responsable: "", plazo: "", estado: "pendiente", indicador: nuevoIndicador(), nota: "" }; }
   const nuevoMiembro = id => ({ id, perfil: "", servicio: "", papel: "miembro", implicado: false });
@@ -160,7 +160,8 @@
   // La causa de fondo de una causa: el último «¿por qué?» contestado (o la propia causa)
   const causaFondo = x => [...x.porques].reverse().find(lleno) || x.texto;
   const causasCon = a => a.causas.filter(x => lleno(x.texto));
-  const causasDe = (a, k) => a.causas.filter(x => x.cat === k);
+  // Las causas de una categoría en una espina ("" = la principal; si no, el id de un problema en la atención)
+  const causasDe = (a, k, espina) => a.causas.filter(x => x.cat === k && (espina === undefined || (x.espina || "") === espina));
   const elegidas = a => causasCon(a).filter(x => x.elegida);
   const ESTADOS_PRUEBA = { "": "Sin comprobar", probable: "Probable", comprobada: "Comprobada con datos", descartada: "Descartada" };
   // Ranking por votos (a igual número de votos, primero las elegidas y luego por orden de escritura)
@@ -357,6 +358,78 @@
   }
   const avisoPrivacidad = a => hayDatoPersonal(a) ? [{ nivel: "warn", texto: "Parece que has escrito un nombre, un número de historia u otro dato que identifica a alguien. Un análisis no los necesita: usa perfiles («enfermera de triaje») y bórralo." }] : [];
 
+  // ---------- Análisis causa raíz: decidir, equipo, cronología, espinas por problema ----------
+  const CLASES = { ea: "Evento adverso (con daño)", casi: "Casi incidente (no llegó al paciente)", sindano: "Incidente sin daño", situacion: "Situación con riesgo" };
+  const PAPELES = { miembro: "Miembro", coordina: "Coordina", experto: "Experto en el proceso", otroNivel: "De otro nivel de la organización", calidad: "Calidad o seguridad", paciente: "Representante de los pacientes" };
+  const PERFILES_ACR = [
+    { perfil: "Responsable de seguridad del paciente", papel: "coordina" }, { perfil: "Técnico o técnica de calidad", papel: "calidad" },
+    { perfil: "Profesional del proceso de otra unidad", papel: "experto" }, { perfil: "Supervisión de otra unidad", papel: "otroNivel" },
+    { perfil: "Médico o médica de otro servicio", papel: "experto" }, { perfil: "Representante de los pacientes, ajeno al caso", papel: "paciente" }
+  ];
+  const FUENTES = { historia: "Historia clínica", registro: "Registro o sistema", entrevista: "Entrevista", observacion: "Visita u observación", otra: "Otra" };
+  // Suma días a una fecha AAAA-MM-DD
+  const masDias = (iso, d) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || "")); if (!m) return ""; const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + d)); return t.toISOString().slice(0, 10); };
+  // Plazos del RCA²: empezar en 72 horas desde que se decide que hace falta; terminar en 30–45 días
+  function plazos(a, hoy) {
+    const base = a.incidente.fechaDecision || a.incidente.fecha; if (!/^\d{4}-\d{2}-\d{2}$/.test(base || "")) return null;
+    const empezar = masDias(base, 3), fin30 = masDias(base, 30), fin45 = masDias(base, 45);
+    const primera = a.reuniones.map(r => r.fecha).filter(f => /^\d{4}-\d{2}-\d{2}$/.test(f)).sort()[0] || "";
+    const h = hoy || "";
+    return { base, empezar, fin30, fin45, primera, tarde: primera ? primera > empezar : (h && h > empezar), dias: h ? Math.round((Date.parse(h) - Date.parse(base)) / 864e5) : null, pasado45: h && h > fin45 };
+  }
+  const nivelSAC = a => a.ambito === "otro" ? "" : sac(a.ambito, a.incidente.gravedad, a.incidente.frecuencia);
+  function avisosDecidir(a, hoy) {
+    const A = [], I = a.incidente, n = nivelSAC(a);
+    if (!I.clase) A.push({ nivel: "nota", texto: "Elige qué tipo de incidente es." });
+    if (I.clase === "casi") A.push({ nivel: "nota", texto: "En un casi incidente, puntúa la gravedad pensando en lo peor que razonablemente podría haber pasado." });
+    if (a.ambito === "otro") A.push({ nivel: "nota", texto: "La matriz SAC del SiNASP tiene una versión para hospital y otra para atención primaria: elige la que más se parezca." });
+    else if (!n && (lleno(I.gravedad) || lleno(I.frecuencia))) A.push({ nivel: "nota", texto: "Elige la gravedad y la frecuencia para calcular el nivel de riesgo (SAC)." });
+    if (n === "moderado" || n === "bajo") A.push({ nivel: "warn", texto: "Con este nivel de riesgo, el SiNASP propone analizarlo junto con otros incidentes parecidos, no con un ACR completo. Puedes seguir si el equipo lo cree útil, o usar un Ishikawa." });
+    if (I.conducta === "si") A.push({ nivel: "warn", texto: "Si hubo un acto delictivo, consumo de sustancias o algo hecho a propósito para causar daño, no es para un ACR: se trata por la vía que haya definido tu organización. El ACR busca causas del sistema." });
+    if (!I.conducta) A.push({ nivel: "nota", texto: "Responde a la pregunta de cultura justa antes de seguir." });
+    if (!lleno(I.fecha)) A.push({ nivel: "nota", texto: "Escribe la fecha del incidente." });
+    if (I.fecha && I.fechaDecision && I.fechaDecision < I.fecha) A.push({ nivel: "warn", texto: "La fecha de la decisión es anterior a la del incidente." });
+    const P = plazos(a, hoy);
+    if (P && P.tarde) A.push({ nivel: "warn", texto: P.primera ? `La primera reunión (${fmtFecha(P.primera)}) fue después de las 72 horas recomendadas (${fmtFecha(P.empezar)}). Anótalo como aprendizaje para el próximo.` : `Han pasado más de 72 horas desde la decisión (el ${fmtFecha(P.empezar)}) y aún no hay ninguna reunión anotada.` });
+    if (I.clase === "ea" && !I.inmediata.atendido) A.push({ nivel: "nota", texto: "Lo primero, antes del análisis: atender al paciente y dejar la situación segura." });
+    return A;
+  }
+  function avisosEquipo(a) {
+    const A = [], E = a.equipo.filter(m => lleno(m.perfil)), n = E.length;
+    if (!n) { A.push({ nivel: "nota", texto: "Forma el equipo: de 4 a 6 personas, por su perfil, no por su nombre." }); return A; }
+    if (n < 4) A.push({ nivel: "nota", texto: `El equipo tiene ${n}. El informe RCA² recomienda de 4 a 6 personas.` });
+    if (n > 6) A.push({ nivel: "warn", texto: `El equipo tiene ${n}. Con más de 6 cuesta reunirse y avanzar: el resto puede colaborar con entrevistas o revisando el borrador.` });
+    E.filter(m => m.implicado).forEach(m => A.push({ nivel: "warn", miembro: m.id, texto: `«${corto(m.perfil, 40)}» estuvo implicado en el incidente: se le entrevista, pero no debe formar parte del equipo.` }));
+    if (!E.some(m => m.papel === "coordina")) A.push({ nivel: "nota", texto: "Nombra a quien coordina el análisis." });
+    if (!E.some(m => m.papel === "experto")) A.push({ nivel: "nota", texto: "Incluye a alguien que conozca bien el proceso (de otra unidad, si es posible)." });
+    if (!E.some(m => m.papel === "otroNivel")) A.push({ nivel: "nota", texto: "Incluye a alguien de otro nivel de la organización (otra unidad, otra categoría profesional)." });
+    if (!E.some(m => m.papel === "paciente")) A.push({ nivel: "nota", texto: "Valora incluir a un representante de los pacientes ajeno al caso." });
+    if (!a.entrevistas.some(e => /paciente|familia/i.test(sinTildes(e.perfil)))) A.push({ nivel: "nota", texto: "Entrevista también al paciente o a su familia, si pueden y quieren: ven cosas que nadie más ve." });
+    return A;
+  }
+  function avisosCronologia(a) {
+    const A = [], H = a.cronologia.filter(h => lleno(h.hecho));
+    if (H.length < 3) A.push({ nivel: "nota", texto: "Reconstruye lo que pasó, hecho a hecho y con su hora, con la historia clínica, los registros y las entrevistas." });
+    H.forEach((h, i) => {
+      if (!h.fuente) A.push({ nivel: "nota", hecho: h.id, texto: `Hecho ${i + 1}: ¿de dónde sale? Indica la fuente.` });
+      if (h.desajuste && !lleno(h.debia)) A.push({ nivel: "nota", hecho: h.id, texto: `Hecho ${i + 1}: escribe qué debería haber pasado.` });
+    });
+    const D = H.filter(h => h.desajuste), conProblema = new Set(a.problemasAtencion.map(p => p.hechoId));
+    if (D.some(h => !conProblema.has(h.id))) A.push({ nivel: "nota", texto: "Hay desajustes sin convertir en «problema en la atención». Conviértelos, o junta varios en uno." });
+    if (H.length >= 3 && !H.some(h => h.bien)) A.push({ nivel: "nota", texto: "Marca también lo que salió bien: el Protocolo de Londres de 2024 pide reconocerlo, y ayuda a entender qué protege." });
+    return A;
+  }
+  // Las espinas del análisis: la principal (el problema) y una por problema en la atención
+  const espinasDe = a => [{ id: "", texto: a.problema || "El problema" }, ...a.problemasAtencion.filter(p => lleno(p.texto)).map(p => ({ id: p.id, texto: p.texto }))];
+  // Categoría de la plantilla actual para una idea común (para las preguntas desencadenantes)
+  function categoriaPorEq(a, eq) {
+    const C = categorias(a); if (!C.length) return "";
+    for (const e of [eq, ...(EQ_ALTERNATIVA[eq] || [])]) { const c = C.find(x => x.eq === e); if (c) return c.k; }
+    return C[0].k;
+  }
+  const respuesta = (a, id) => (a.preguntas.find(q => q.id === id) || { r: "" }).r;
+  function responder(a, id, r) { a.preguntas = a.preguntas.filter(q => q.id !== id); if (r) a.preguntas.push({ id, r }); }
+
   // ---------- Pasos ----------
   const PASOS = {
     ishikawa: [
@@ -384,8 +457,8 @@
       espina: causasCon(a).length >= 3,
       elegir: elegidas(a).length > 0 && elegidas(a).every(x => lleno(x.comprobacion) || x.prueba),
       acciones: X.length > 0 && X.every(x => lleno(x.responsable) && lleno(x.plazo) && lleno(x.indicador.nombre)),
-      decidir: !!sac(a.ambito, a.incidente.gravedad, a.incidente.frecuencia) && lleno(a.incidente.fecha),
-      equipo: a.equipo.length >= 4, cronologia: a.cronologia.filter(h => lleno(h.hecho)).length >= 3,
+      decidir: !!nivelSAC(a) && lleno(a.incidente.fecha) && !!a.incidente.clase && a.incidente.conducta === "no",
+      equipo: a.equipo.filter(m => lleno(m.perfil) && !m.implicado).length >= 4, cronologia: a.cronologia.filter(h => lleno(h.hecho)).length >= 3 && (!a.cronologia.some(h => h.desajuste) || a.problemasAtencion.some(p => lleno(p.texto))),
       afirmaciones: elegidas(a).length > 0 && a.afirmaciones.some(f => lleno(f.texto)),
       cerrar: lleno(a.informacion.profesionales) && lleno(a.informacion.paciente)
     };
@@ -411,10 +484,10 @@
 
   // ---------- El dibujo: datos para dibujo.js ----------
   function datosDibujo(a, o = {}) {
-    const N = numerosElegidas(a);
+    const N = numerosElegidas(a), esp = o.espina || "", pa = a.problemasAtencion.find(p => p.id === esp);
     return {
-      problema: a.problema || a.efectoPrincipal || "", titulo: o.titulo || "",
-      categorias: categorias(a).map(c => ({ nom: c.nom, causas: causasDe(a, c.k).filter(x => lleno(x.texto) && (!o.soloElegidas || x.elegida))
+      problema: pa ? pa.texto : (a.problema || a.efectoPrincipal || ""), titulo: o.titulo || "",
+      categorias: categorias(a).map(c => ({ nom: c.nom, causas: causasDe(a, c.k, esp).filter(x => lleno(x.texto) && (!o.soloElegidas || x.elegida))
         .map(x => ({ texto: limpia(x.texto), porques: o.porques ? x.porques.filter(lleno).map(limpia) : [], elegida: x.elegida, n: N[x.id] || 0, prueba: x.prueba })) }))
     };
   }
@@ -427,9 +500,10 @@
       formato: FORMATO, version: VERSION_INTERCAMBIO, app: "acrishikawa", appVersion, generado,
       analisis: lista.map(a => ({
         id: a.id, tipo: a.tipo, titulo: a.titulo, unidad: a.unidad, ambito: a.ambito, fecha: a.fecha || a.incidente.fecha || hoyIsoDe(a.creado),
-        sac: a.tipo === "acr" ? (NIVELES_SAC[sac(a.ambito, a.incidente.gravedad, a.incidente.frecuencia)] || { n: null }).n : null,
+        sac: a.tipo === "acr" ? (NIVELES_SAC[nivelSAC(a)] || { n: null }).n : null,
+        problemasAtencion: a.problemasAtencion.filter(p => lleno(p.texto)).map(p => p.texto),
         problema: a.problema, dato: a.dato, plantilla: a.plantilla, categorias: categorias(a).map(c => c.nom),
-        causas: causasCon(a).map(x => ({ id: x.id, categoria: nombreCat(a, x.cat), texto: x.texto, causaFondo: causaFondo(x), elegida: x.elegida, estadoPrueba: x.prueba || null, votos: x.votos || 0 })),
+        causas: causasCon(a).map(x => ({ id: x.id, categoria: nombreCat(a, x.cat), espina: x.espina ? (a.problemasAtencion.find(p => p.id === x.espina) || { texto: "" }).texto : null, texto: x.texto, causaFondo: causaFondo(x), elegida: x.elegida, estadoPrueba: x.prueba || null, votos: x.votos || 0 })),
         afirmaciones: a.afirmaciones.filter(f => lleno(f.texto)).map(f => ({ id: f.id, texto: f.texto })),
         acciones: a.acciones.filter(x => lleno(x.que)).map(x => ({ id: x.id, que: x.que, fuerza: fuerzaAccion(x) || null, categoria: x.categoria ? JERARQUIA[x.categoria].nom : null, responsable: x.responsable, plazo: x.plazo, estado: x.estado,
           causas: x.causas.map(id => { const c = a.causas.find(y => y.id === id); return c ? c.texto : ""; }).filter(lleno),
@@ -510,13 +584,14 @@
   const txt = (v, max) => (typeof v === "string" || typeof v === "number") ? String(v).slice(0, max) : "";
   const TODAS_CATS = [...new Set(Object.values(PLANTILLAS).flatMap(p => p.cats.map(c => c.k)).concat(Array.from({ length: MAX_PROPIAS }, (_, i) => "p" + i)))];
   const ESQ = {
-    causa: { id: "id", cat: { en: ["", ...TODAS_CATS] }, texto: [500], porques: { lista: 500, keepEmpty: MAX_PORQUES }, votos: "ent", elegida: "b", comprobacion: [1000], prueba: { en: Object.keys(ESTADOS_PRUEBA) } },
+    causa: { id: "id", cat: { en: ["", ...TODAS_CATS] }, espina: "ref", texto: [500], porques: { lista: 500, keepEmpty: MAX_PORQUES }, votos: "ent", elegida: "b", comprobacion: [1000], prueba: { en: Object.keys(ESTADOS_PRUEBA) } },
     indicador: { nombre: [500], numerador: [500], denominador: [500], esperado: [60], fecha: [20] },
     accion: { id: "id", que: [1500], categoria: { en: ["", ...Object.keys(JERARQUIA)] }, causas: { lista: "ref", max: 40 }, responsable: [300], plazo: [20], estado: { en: Object.keys(ESTADOS_ACCION) }, indicador: { obj: "indicador" }, nota: [1000] },
-    miembro: { id: "id", perfil: [200], servicio: [200], papel: [40], implicado: "b" },
+    miembro: { id: "id", perfil: [200], servicio: [200], papel: { en: Object.keys(PAPELES) }, implicado: "b" },
+    respuesta: { id: [20], r: { en: ["", "si", "no", "na"] } },
     entrevista: { id: "id", perfil: [200], fecha: [20], hecha: "b", nota: [1000] },
     reunion: { id: "id", fecha: [20], duracion: [40], nota: [1000] },
-    hecho: { id: "id", hora: [40], hecho: [1000], fuente: [200], debia: [1000], desajuste: "b", bien: "b" },
+    hecho: { id: "id", hora: [40], hecho: [1000], fuente: { en: ["", ...Object.keys(FUENTES)] }, debia: [1000], desajuste: "b", bien: "b" },
     problemaAt: { id: "id", texto: [500], hechoId: "ref" },
     afirmacion: { id: "id", causaId: "ref", texto: [2000], deber: [500], pruebas: [1000] },
     inmediata: { atendido: "b", seguro: "b", apartado: "b", informado: "b" },
@@ -526,11 +601,11 @@
     analisis: { id: "id", tipo: { en: Object.keys(TIPOS) }, titulo: [200], unidad: [200], ambito: { en: ["hospital", "primaria", "otro"] }, fecha: [20], responsable: [200],
       incidente: { obj: "incidente" }, descripcion: [4000], problema: [600], dato: [500], fuenteDato: [300],
       equipo: { de: "miembro", max: 20 }, entrevistas: { de: "entrevista", max: 40 }, reuniones: { de: "reunion", max: 40 }, cronologia: { de: "hecho", max: 200 }, problemasAtencion: { de: "problemaAt", max: 30 },
-      plantilla: { en: Object.keys(PLANTILLAS) }, categoriasPropias: { lista: 60, keepEmpty: MAX_PROPIAS }, causas: { de: "causa", max: 200 }, efectoPrincipal: [600],
+      plantilla: { en: Object.keys(PLANTILLAS) }, categoriasPropias: { lista: 60, keepEmpty: MAX_PROPIAS }, causas: { de: "causa", max: 300 }, efectoPrincipal: [600], preguntas: { de: "respuesta", max: 120 },
       afirmaciones: { de: "afirmacion", max: 60 }, acciones: { de: "accion", max: 60 }, informacion: { obj: "informacion" }, apoyo: { obj: "apoyo" },
       conclusiones: [5000], proxRevision: [20], notas: [3000], origen: [300], creado: [40], modificado: [40] }
   };
-  const FABRICA = { causa: id => nuevaCausa(id), indicador: nuevoIndicador, accion: nuevaAccion, miembro: nuevoMiembro, entrevista: nuevaEntrevista, reunion: nuevaReunion, hecho: nuevoHecho, problemaAt: nuevoProblemaAt, afirmacion: nuevaAfirmacion,
+  const FABRICA = { respuesta: () => ({ id: "", r: "" }), causa: id => nuevaCausa(id), indicador: nuevoIndicador, accion: nuevaAccion, miembro: nuevoMiembro, entrevista: nuevaEntrevista, reunion: nuevaReunion, hecho: nuevoHecho, problemaAt: nuevoProblemaAt, afirmacion: nuevaAfirmacion,
     inmediata: () => nuevoAnalisis("x", "").incidente.inmediata, incidente: () => nuevoAnalisis("x", "").incidente, informacion: () => nuevoAnalisis("x", "").informacion, apoyo: () => nuevoAnalisis("x", "").apoyo, analisis: id => nuevoAnalisis(id, "") };
   function sanear(esq, o, genId) {
     if (!o || typeof o !== "object" || Array.isArray(o)) return null;
@@ -560,6 +635,9 @@
     a.acciones.forEach(x => { x.causas = x.causas.filter(id => causas.has(id)); });
     a.afirmaciones.forEach(f => { if (!causas.has(f.causaId)) f.causaId = ""; });
     a.problemasAtencion.forEach(p => { if (!hechos.has(p.hechoId)) p.hechoId = ""; });
+    const problemas = new Set(a.problemasAtencion.map(p => p.id));
+    a.causas.forEach(x => { if (!problemas.has(x.espina)) x.espina = ""; });
+    a.preguntas = a.preguntas.filter(q => lleno(q.id) && q.r);
     return a;
   }
   function sanearDatos(o, genId, fecha) {
@@ -583,7 +661,8 @@
     TIPOS, MAX_PORQUES, nuevoAnalisis, nuevaCausa, nuevoIndicador, nuevaAccion, nuevoMiembro, nuevaEntrevista, nuevaReunion, nuevoHecho, nuevoProblemaAt, nuevaAfirmacion,
     causaFondo, causasCon, causasDe, elegidas, ESTADOS_PRUEBA, ranking, numerosElegidas,
     FUERZAS, JERARQUIA, categoriaSugerida, fuerzaAccion, responsableGrupo, ESTADOS_ACCION, cuentaIncidentes,
-    FRECUENCIAS, GRAVEDADES, MATRIZ_SAC, NIVELES_SAC, sac,
+    FRECUENCIAS, GRAVEDADES, MATRIZ_SAC, NIVELES_SAC, sac, nivelSAC,
+    CLASES, PAPELES, PERFILES_ACR, FUENTES, masDias, plazos, avisosDecidir, avisosEquipo, avisosCronologia, espinasDe, categoriaPorEq, respuesta, responder,
     pareceDatoPaciente, hayDatoPersonal, palabrasNoNeutras, tipoProblema, esGenerica,
     avisosProblema, avisosCausa, avisosEspina, avisosElegir, avisosAcciones, avisoPrivacidad,
     PASOS, pasosDe, progreso, pasoPendiente, nombreAnalisis, siguientePaso, resumen, datosDibujo,
