@@ -201,9 +201,9 @@
   };
   // Cuando no se elige la categoría, se intenta adivinar por el texto (como fuerzaMedida de Auditorías)
   const PISTAS = [
-    ["forzada", /no (se )?(puede|deja|permit)|campo obligatori|obligatori[oa] (para|en el programa)|bloque(a|e|o)|impid|funcion forzad|forzad|conexion(es)? que solo/],
+    ["forzada", /no (se )?(puede|pueda|deja|deje|permit)|campo obligatori|obligatori[oa] (para|en el programa)|bloque(a|e|o)|impid|funcion forzad|forzad|conexion(es)? que solo/],
     ["espacio", /obra|reform|mampar|puerta|ventan|redistribu|espacio fisico|visibilidad desde|camara|mover el (control|puesto)/],
-    ["estandarizar", /estandariz|codigo de barras|mismo modelo|unific|kit|carro (unico|estandar)|cita (de \w+ )?obligatori|paso obligatorio en el circuito/],
+    ["estandarizar", /estandariz|codigo de barras|mismo modelo|un solo modelo|unific|kit|carro (unico|estandar)|cita (de \w+ )?obligatori|paso obligatorio en el circuito/],
     ["simplificar", /simplific|eliminar (el )?paso|quitar (el )?paso|suprimir/],
     ["dispositivo", /nuevo (aparato|dispositivo|equipo)|comprar|adquiri|sustituir el (aparato|equipo)|termometros? fijos?/],
     ["direccion", /la direccion|gerencia|presupuesto|dotar|contratar/],
@@ -626,6 +626,136 @@
     };
   }
 
+  // ---------- Datos de otras apps: se copian, se sanean y no queda vínculo vivo ----------
+  // Cada lector acepta el paquete de intercambio de la otra app o su copia .json (clave «intercambio»)
+  // y devuelve { lista } o { error: "formato" | "version" }. Nunca se importa un id de ejemplo.
+  const tx = (v, n = 1000) => typeof v === "string" ? v.trim().slice(0, n) : typeof v === "number" && isFinite(v) ? String(v) : "";
+  const nmx = v => typeof v === "number" && isFinite(v) ? v : null;
+  const deIntercambio = o => (o && typeof o === "object" && !o.formato && o.intercambio && typeof o.intercambio === "object") ? o.intercambio : o;
+  const esEj = x => /^ej-/.test(String(x && x.id || ""));
+  // Las 7 ramas del Ishikawa de AMFE son las 7 categorías de la guía (mismas claves)
+  const RAMAS_AMFE = ["personal", "procedimiento", "organizacion", "comunicacion", "equipamiento", "entorno", "paciente"];
+  function sanearFallo(f, completo) {
+    const isk = completo && Array.isArray(completo.ishikawa) ? completo.ishikawa.filter(c => c && RAMAS_AMFE.includes(c.cat) && lleno(tx(c.texto))).slice(0, 60)
+      .map(c => ({ cat: c.cat, texto: tx(c.texto, 500), porques: Array.isArray(c.porques) ? c.porques.slice(0, MAX_PORQUES).map(p => tx(p, 500)) : [], elegida: c.elegida === true })) : [];
+    return { num: nmx(f.num), subproceso: tx(f.subproceso, 200), fallo: tx(f.fallo), efecto: tx(f.efecto), causa: tx(f.causa), controles: tx(f.controles),
+      ipr: nmx(f.ipr), g: nmx(f.g), o: nmx(f.o), d: nmx(f.d), prioritario: f.prioritario === true, critico: f.critico === true, ishikawa: isk,
+      acciones: Array.isArray(f.acciones) ? f.acciones.slice(0, 20).filter(x => x && lleno(tx(x.que))).map(x => ({ que: tx(x.que, 1500), quien: tx(x.quien, 300), plazo: tx(x.fin || x.plazo, 20), indicador: x.indicador && typeof x.indicador === "object" ? { nombre: tx(x.indicador.nombre, 500), estandar: tx(x.indicador.estandar, 60) } : { nombre: "", estandar: "" } })) : [] };
+  }
+  // AMFE (amfe-fallos v1) y Mapa de Riesgos (mapariesgos-mapas v1, o el archivo de «Llevar a Auditorías»)
+  function leerFallos(o0) {
+    const o = deIntercambio(o0); let amfes = null, origen = "AMFE";
+    if (o && o.formato === "amfe-fallos") { if (o.version !== 1) return { error: "version" }; amfes = o.amfes; origen = o0 && o0.app === "mapariesgos" ? "Mapa de Riesgos" : "AMFE"; }
+    else if (o && o.formato === "mapariesgos-mapas") { if (o.version !== 1) return { error: "version" }; amfes = Array.isArray(o.mapas) ? o.mapas.filter(m => m && !esEj(m) && m.amfe).map(m => Object.assign({}, m.amfe, { id: m.id, titulo: m.titulo || m.amfe.titulo })) : null; origen = "Mapa de Riesgos"; }
+    if (!Array.isArray(amfes)) return { error: "formato" };
+    // La copia .json de AMFE trae además los AMFE completos (con su Ishikawa por fallo)
+    const completos = o0 && Array.isArray(o0.amfes) ? o0.amfes : [];
+    const lista = amfes.filter(a => a && typeof a === "object" && !esEj(a) && Array.isArray(a.fallos)).slice(0, 200).map(a => {
+      const c = completos.find(x => x && x.id === a.id), fc = id => c && Array.isArray(c.fallos) ? c.fallos.find(y => y && y.id === id) : null;
+      return { origen, titulo: tx(a.titulo || a.proceso, 300) || "Sin título", unidad: tx(a.unidad, 200),
+        fallos: a.fallos.filter(f => f && lleno(tx(f.fallo))).slice(0, 500).map(f => sanearFallo(f, fc(f.id))).sort((x, y) => (y.prioritario - x.prioritario) || ((y.ipr || 0) - (x.ipr || 0))) };
+    }).filter(a => a.fallos.length);
+    return { lista };
+  }
+  // Rondas de Seguridad (rondas-seguridad v1): los puntos calientes
+  function leerRondas(o0) {
+    const o = deIntercambio(o0);
+    if (!o || o.formato !== "rondas-seguridad" || !Array.isArray(o.unidades)) return { error: "formato" };
+    if (o.version !== 1) return { error: "version" };
+    const lista = o.unidades.filter(u => u && !esEj(u)).slice(0, 100).map(u => ({ unidad: tx(u.unidad, 200) || "Unidad sin nombre",
+      calientes: (Array.isArray(u.puntosCalientes) ? u.puntosCalientes : []).filter(p => p && lleno(tx(p.texto))).slice(0, 100).map(p => ({ texto: tx(p.texto, 500), bloque: tx(p.bloque, 200), por: p.por === "turno" ? "turno" : "repetido", turno: tx(p.turno, 40), evaluadas: nmx(p.evaluadas), fallos: nmx(p.fallos) })) })).filter(u => u.calientes.length);
+    return { lista };
+  }
+  // Flujograma (flujograma-procesos v1): los pasos del proceso, en orden
+  function leerFlujos(o0) {
+    const o = deIntercambio(o0);
+    if (!o || o.formato !== "flujograma-procesos" || !Array.isArray(o.flujos)) return { error: "formato" };
+    if (o.version !== 1) return { error: "version" };
+    const lista = o.flujos.filter(f => f && !esEj(f) && Array.isArray(f.pasos)).slice(0, 100).map(f => ({ titulo: tx(f.titulo || f.proceso, 300) || "Proceso sin nombre", unidad: tx(f.unidad, 200),
+      pasos: f.pasos.filter(p => p && lleno(tx(p.texto))).slice(0, 300).sort((a, b) => (nmx(a.num) || 0) - (nmx(b.num) || 0)).map(p => ({ texto: tx(p.texto, 500), actor: tx(p.actor, 200), tipo: tx(p.tipo, 30), subproceso: tx(p.subproceso, 200) })) })).filter(f => f.pasos.length);
+    return { lista };
+  }
+  // Indicadores (sus datos o su copia .json): para el indicador de una acción
+  function leerIndicadores(o) {
+    if (!o || typeof o !== "object" || !Array.isArray(o.indicadores)) return { error: "formato" };
+    const lista = o.indicadores.slice(0, 300).filter(x => x && typeof x === "object" && !esEj(x) && lleno(tx(x.nombre))).map(x => {
+      const e = tx(x.estandar, 30).replace(/[^\d.,]/g, "");
+      return { nombre: tx(x.nombre, 500), numerador: tx(x.numerador, 500), denominador: tx(x.denominador, 500), esperado: e ? `${x.sentido === "menos" ? "≤" : "≥"} ${e} %` : "" };
+    });
+    return { lista };
+  }
+  // A qué categoría de la plantilla va un texto suelto (la causa de un fallo del AMFE, por ejemplo)
+  const PISTAS_CAUSA = [["paciente", /paciente|familia|acompa|idioma|fragil|anciano|mayor/], ["tecnologia", /programa|informatic|sistema|aparato|equipo de|monitor|bomba|material|termometro|pantalla|alerta/],
+    ["equipo", /comunica|informacion|traspaso|aviso|registro|llamad|transmi/], ["entorno", /ruido|espacio|luz|sala|distancia|interrup|distracc/], ["tarea", /protocolo|procedimiento|norma|instruccion|circuito/],
+    ["persona", /formaci|experiencia|cansancio|fatiga|conocimiento|eventual|nuevo/], ["organizacion", /turno|plantilla|personal|carga|responsable|asignad|supervis|organiza/]];
+  function catPorTexto(a, texto) { const t = sinTildes(texto); const p = PISTAS_CAUSA.find(([, re]) => re.test(t)); return categoriaPorEq(a, p ? p[0] : "organizacion"); }
+  // Rellena un análisis con un fallo de AMFE o de Mapa de Riesgos (no borra lo que ya hay: añade)
+  function traerFallo(a, amfe, f, genId) {
+    if (!lleno(a.problema)) a.problema = f.fallo;
+    if (!lleno(a.titulo)) a.titulo = corto(f.fallo, 80);
+    if (!lleno(a.unidad)) a.unidad = amfe.unidad;
+    if (!lleno(a.dato)) a.dato = [f.num ? `Fallo nº ${f.num}` : "", f.ipr ? `IPR ${f.ipr} (G ${f.g} · O ${f.o} · D ${f.d})` : "", f.critico ? "fallo crítico" : ""].filter(Boolean).join(", ");
+    if (!lleno(a.fuenteDato)) a.fuenteDato = `${amfe.origen}: ${amfe.titulo}`;
+    a.origen = `${amfe.origen} · ${amfe.titulo}${f.num ? " · fallo nº " + f.num : ""}`;
+    const nuevas = [];
+    if (f.ishikawa.length && (a.plantilla === "guia")) f.ishikawa.forEach(c => nuevas.push(Object.assign(nuevaCausa(genId(), c.cat), { texto: c.texto, porques: [...c.porques, "", "", "", "", ""].slice(0, MAX_PORQUES), elegida: c.elegida })));
+    else if (lleno(f.causa)) f.causa.split(/;\s*/).filter(lleno).slice(0, 10).forEach(t => nuevas.push(Object.assign(nuevaCausa(genId(), catPorTexto(a, t)), { texto: limpia(t).replace(/^./, m => m.toUpperCase()) })));
+    const ya = new Set(a.causas.map(x => normal(x.texto)));
+    const C = nuevas.filter(x => !ya.has(normal(x.texto))); a.causas.push(...C);
+    const yaA = new Set(a.acciones.map(x => normal(x.que)));
+    const X = f.acciones.filter(x => !yaA.has(normal(x.que))).map(x => Object.assign(nuevaAccion(genId()), { que: x.que, responsable: x.quien, plazo: /^\d{4}-\d{2}-\d{2}$/.test(x.plazo) ? x.plazo : "", indicador: Object.assign(nuevoIndicador(), { nombre: x.indicador.nombre, esperado: x.indicador.estandar }), nota: `Viene de ${amfe.origen}.` }));
+    a.acciones.push(...X);
+    if (lleno(f.efecto) || lleno(f.controles)) a.notas = [a.notas, `De ${amfe.origen}: efecto: ${f.efecto || "—"}; controles actuales: ${f.controles || "—"}.`].filter(lleno).join("\n");
+    return { causas: C.length, acciones: X.length };
+  }
+  function traerCaliente(a, u, p) {
+    if (!lleno(a.problema)) a.problema = `En ${u.unidad}, «${limpia(p.texto)}» no se cumple ${p.por === "turno" ? `en ninguna de las rondas del turno de ${p.turno || "un turno"}` : "en dos de las tres últimas rondas de seguridad"}.`;
+    if (!lleno(a.titulo)) a.titulo = corto(p.texto, 80);
+    if (!lleno(a.unidad)) a.unidad = u.unidad;
+    if (!lleno(a.dato)) a.dato = [p.evaluadas != null ? `${p.evaluadas} rondas con este punto evaluado` : "", p.fallos != null ? `no se cumple en ${p.fallos}` : ""].filter(Boolean).join("; ");
+    if (!lleno(a.fuenteDato)) a.fuenteDato = "Rondas de seguridad" + (p.bloque ? ` (bloque: ${p.bloque})` : "");
+    a.origen = `Rondas de Seguridad · ${u.unidad}`;
+  }
+  // La cronología desde un flujograma: cada paso, en la fila de «lo que debería haber pasado»
+  function traerFlujo(a, f, genId) {
+    const ya = new Set(a.cronologia.map(h => normal(h.debia)));
+    const H = f.pasos.filter(p => !/inicio|fin/.test(p.tipo) || lleno(p.texto)).filter(p => !ya.has(normal(p.texto))).map(p => Object.assign(nuevoHecho(genId()), { debia: p.texto + (p.actor ? ` (${p.actor})` : "") }));
+    a.cronologia.push(...H); return H.length;
+  }
+  // Lectura Crítica (lecturacritica-lecturas v1). Mismo código que AMFE, DAFO, Auditorías e Indicadores.
+  const FORMATO_LC = "lecturacritica-lecturas", VERSION_LC = 1;
+  const DECISION_LC = { aplicar: "Aplicar", esperar: "Esperar", descartar: "Descartar" };
+  function lecturasDe(o) {
+    if (o && typeof o === "object" && !o.formato && o.intercambio && typeof o.intercambio === "object") o = o.intercambio;
+    if (!o || typeof o !== "object" || o.formato !== FORMATO_LC || !Array.isArray(o.lecturas)) return { error: "formato" };
+    if (o.version !== VERSION_LC) return { error: "version" };
+    const t = (v, n) => typeof v === "string" ? v.trim().slice(0, n) : typeof v === "number" && isFinite(v) ? String(v) : "";
+    const nm = v => typeof v === "number" && isFinite(v) ? v : null;
+    const ok = v => typeof v === "string" && v.trim() !== "";
+    const lecturas = o.lecturas.slice(0, 500).filter(x => x && typeof x === "object" && typeof x.id === "string" && !/^ej-/.test(x.id)).map(x => {
+      const p = x.pico && typeof x.pico === "object" ? x.pico : {};
+      const rc = Array.isArray(x.resultadosClave) ? x.resultadosClave.filter(r => r && typeof r === "object").slice(0, 5)
+        .map(r => ({ desenlace: t(r.desenlace, 300), medida: t(r.medida, 40), valor: nm(r.valor), icInf: nm(r.icInf), icSup: nm(r.icSup), texto: t(r.texto, 600) })) : [];
+      return {
+        id: t(x.id, 80), titulo: t(x.titulo, 500), cita: t(x.cita, 1500), doi: t(x.doi, 200), pmid: t(x.pmid, 30), url: t(x.url, 500), anio: t(x.anio, 10),
+        pregunta: t(x.pregunta, 1200), pico: { p: t(p.p, 600), i: t(p.i, 600), c: t(p.c, 600), o: t(p.o, 600) }, tipoNombre: t(x.tipoNombre, 120),
+        decision: DECISION_LC[x.decision] ? x.decision : "", motivo: t(x.motivo, 2000), resultadosClave: rc, mensaje: t(x.mensaje, 2000), fecha: t(x.fecha, 20)
+      };
+    }).filter(x => ok(x.titulo) || ok(x.cita));
+    return { lecturas, lista: lecturas };
+  }
+  const referenciaLC = x => (x.cita || [x.titulo, x.anio, x.doi ? "doi: " + x.doi : ""].filter(Boolean).join(". ")).replace(/\s+/g, " ").trim();
+  function textoEvidenciaLC(x) {
+    const punto = s => /[.!?…]$/.test(s) ? s : s + ".";
+    const r = x.resultadosClave.map(y => y.texto).filter(Boolean);
+    return [
+      punto("Evidencia: " + referenciaLC(x).replace(/\.$/, "") + (x.tipoNombre ? ` (${x.tipoNombre.charAt(0).toLowerCase() + x.tipoNombre.slice(1)})` : "")),
+      ...r.map(s => punto("Resultado: " + s)),
+      x.mensaje ? punto(x.mensaje) : "",
+      x.decision ? `Decisión tras la lectura crítica: ${DECISION_LC[x.decision].toLowerCase()}.` : ""
+    ].filter(Boolean).join(" ");
+  }
+
   // ---------- Intercambio (paquete «acrishikawa-analisis» v1) ----------
   const FORMATO = "acrishikawa-analisis", VERSION_INTERCAMBIO = 1;
   const hoyIsoDe = f => String(f || "").slice(0, 10);
@@ -721,7 +851,7 @@
   const ESQ = {
     causa: { id: "id", cat: { en: ["", ...TODAS_CATS] }, espina: "ref", texto: [500], porques: { lista: 500, keepEmpty: MAX_PORQUES }, votos: "ent", elegida: "b", comprobacion: [1000], prueba: { en: Object.keys(ESTADOS_PRUEBA) } },
     indicador: { nombre: [500], numerador: [500], denominador: [500], esperado: [60], fecha: [20], tipo: { en: ["", ...Object.keys(TIPOS_MEDIDA)] }, resultado: [100], alcanzado: { en: ["", "si", "no"] } },
-    accion: { id: "id", que: [1500], categoria: { en: ["", ...Object.keys(JERARQUIA)] }, causas: { lista: "ref", max: 40 }, responsable: [300], plazo: [20], estado: { en: Object.keys(ESTADOS_ACCION) }, indicador: { obj: "indicador" }, nota: [1000], controla: { en: ["", ...Object.keys(CONTROLA)] }, direccion: { en: ["", "si", "no"] }, motivoDireccion: [1000] },
+    accion: { id: "id", que: [1500], categoria: { en: ["", ...Object.keys(JERARQUIA)] }, causas: { lista: "ref", max: 40 }, responsable: [300], plazo: [20], estado: { en: Object.keys(ESTADOS_ACCION) }, indicador: { obj: "indicador" }, nota: [3000], controla: { en: ["", ...Object.keys(CONTROLA)] }, direccion: { en: ["", "si", "no"] }, motivoDireccion: [1000] },
     miembro: { id: "id", perfil: [200], servicio: [200], papel: { en: Object.keys(PAPELES) }, implicado: "b" },
     respuesta: { id: [20], r: { en: ["", "si", "no", "na"] } },
     entrevista: { id: "id", perfil: [200], fecha: [20], hecha: "b", nota: [1000] },
@@ -738,7 +868,7 @@
       equipo: { de: "miembro", max: 20 }, entrevistas: { de: "entrevista", max: 40 }, reuniones: { de: "reunion", max: 40 }, cronologia: { de: "hecho", max: 200 }, problemasAtencion: { de: "problemaAt", max: 30 },
       plantilla: { en: Object.keys(PLANTILLAS) }, categoriasPropias: { lista: 60, keepEmpty: MAX_PROPIAS }, causas: { de: "causa", max: 300 }, efectoPrincipal: [600], preguntas: { de: "respuesta", max: 120 },
       afirmaciones: { de: "afirmacion", max: 60 }, acciones: { de: "accion", max: 60 }, informacion: { obj: "informacion" }, apoyo: { obj: "apoyo" }, verificacion: { lista: 20, max: 20 },
-      conclusiones: [5000], proxRevision: [20], notas: [3000], origen: [300], creado: [40], modificado: [40] }
+      conclusiones: [5000], proxRevision: [20], notas: [6000], origen: [500], creado: [40], modificado: [40] }
   };
   const FABRICA = { respuesta: () => ({ id: "", r: "" }), causa: id => nuevaCausa(id), indicador: nuevoIndicador, accion: nuevaAccion, miembro: nuevoMiembro, entrevista: nuevaEntrevista, reunion: nuevaReunion, hecho: nuevoHecho, problemaAt: nuevoProblemaAt, afirmacion: nuevaAfirmacion,
     inmediata: () => nuevoAnalisis("x", "").incidente.inmediata, incidente: () => nuevoAnalisis("x", "").incidente, informacion: () => nuevoAnalisis("x", "").informacion, apoyo: () => nuevoAnalisis("x", "").apoyo, analisis: id => nuevoAnalisis(id, "") };
@@ -802,6 +932,7 @@
     avisosProblema, avisosCausa, avisosEspina, avisosElegir, avisosAcciones, avisoPrivacidad,
     PASOS, pasosDe, progreso, pasoPendiente, nombreAnalisis, siguientePaso, resumen, datosDibujo,
     REGLAS, palabrasVagas, avisosAfirmacion, afirmacionSugerida, cumpleReglas, avisosAfirmaciones, TIPOS_MEDIDA, CONTROLA, VERIFICACION, avisosCerrar, conclusionesSugeridas, accionesDe, documentoInforme,
+    leerFallos, leerRondas, leerFlujos, leerIndicadores, catPorTexto, traerFallo, traerCaliente, traerFlujo, FORMATO_LC, VERSION_LC, DECISION_LC, lecturasDe, referenciaLC, textoEvidenciaLC,
     FORMATO, VERSION_INTERCAMBIO, paqueteIntercambio, leerIntercambio,
     documentoFicha, textoIndicador, hojasExcel,
     ESQ, sanear, sanearAnalisis, sanearDatos, fusionar

@@ -1477,3 +1477,15 @@ body.ver-informe .esp-graf { border: 0; padding: 0; }
 .chk--lista:first-of-type { border-top: 0; }
 .chk--lista input { flex: none; margin-top: 2px; }
 .doc-ul { margin: 4px 0 10px 20px; }
+.elegir-g { margin: 10px 0 2px; font-size: 13.5px; color: var(--cyan); }
+.traer .toolbar { flex-wrap: wrap; }
+
+/* ---------- Modo reunión (para proyectar) ---------- */
+body.modo-reunion .app-header, body.modo-reunion .calc-nav, body.modo-reunion .app-footer, body.modo-reunion .banner-ejemplo,
+body.modo-reunion details.facil, body.modo-reunion .volver-cuadro, body.modo-reunion .wiz-nav, body.modo-reunion [data-zona="avisos"], body.modo-reunion .esp-plant, body.modo-reunion .traer { display: none !important; }
+body.modo-reunion .view { max-width: 1500px; font-size: 19px; }
+body.modo-reunion .page-title { font-size: 34px; }
+body.modo-reunion .sec-t { font-size: 26px; }
+body.modo-reunion .cau-in, body.modo-reunion .hx textarea, body.modo-reunion .hx-hora { font-size: 20px; }
+body.modo-reunion .esp-graf svg { min-width: 0; }
+.salir-reunion { position: fixed; top: 10px; right: 10px; z-index: 50; box-shadow: var(--shadow); }

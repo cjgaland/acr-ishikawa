@@ -52,7 +52,72 @@
         { t: "Trampas", h: "<ul><li>Parar en una persona («porque se le olvidó»): todo error humano tiene una causa previa.</li><li>Parar en «no se siguió el protocolo»: pregunta por qué no se siguió.</li><li>Saltar a la solución («porque no hay protocolo» suele esconder «hay que hacer un protocolo»).</li></ul>" }
       ],
       minicaso: "<p>«Se olvidaron de pautar la profilaxis.» ¿Por qué? Porque la orden médica no la incluye por defecto. ¿Por qué? Porque la plantilla de ingreso del programa no tiene ese apartado. Acción fuerte: añadirlo a la plantilla, con la pregunta obligatoria.</p>",
-      practica: { href: "#/analisis/ej-ish-sala/2", texto: "Ver los porqués del ejemplo" } }
+      practica: { href: "#/analisis/ej-ish-sala/2", texto: "Ver los porqués del ejemplo" } },
+    { n: 4, c: "A", titulo: "¿Cuándo hace falta un ACR?", sub: "Gravedad, frecuencia y una respuesta proporcionada",
+      minuto: [
+        "No todos los incidentes necesitan un análisis causa raíz: conviene un <b>criterio explícito</b>, según la gravedad y el riesgo de que se repita.",
+        "El SiNASP usa la <b>matriz SAC</b>: cruza la gravedad (real o, en un casi incidente, la peor razonable) con la frecuencia, y da un nivel del 1 (riesgo extremo) al 4 (bajo).",
+        "Riesgo extremo: <b>ACR</b>. Riesgo alto: <b>ACR simplificado</b> o algo parecido. Riesgo medio o bajo: <b>análisis agregado</b> con otros incidentes parecidos.",
+        "El PSIRF del NHS insiste en lo mismo: una <b>respuesta proporcionada</b>, que va desde una revisión breve hasta una investigación completa."
+      ],
+      secciones: [
+        { t: "La matriz SAC, paso a paso", h: "<ol><li>Gravedad: ¿qué daño causó? Si no llegó a causarlo, ¿qué es lo peor que razonablemente podría haber pasado?</li><li>Frecuencia: ¿cada cuánto puede repetirse aquí? Si hay datos (notificaciones, auditorías), úsalos; si no, la opinión de quien mejor lo conoce.</li><li>Cruza las dos en la matriz: el nivel dice qué tipo de análisis toca.</li></ol><p>Ojo: en el SiNASP el <b>1 es el más grave</b>. En el informe RCA² de Estados Unidos va al revés (3 es el más grave).</p>" },
+        { t: "Antes de empezar", h: "<ul><li><b>Lo inmediato</b>: atender al paciente, dejar la situación segura, apartar los equipos implicados, informar a la familia.</li><li><b>Cultura justa</b>: lo delictivo o hecho a propósito para causar daño no va a un ACR.</li><li><b>Plazos</b>: empezar en 72 horas desde que se decide; terminar en 30 a 45 días.</li></ul>" }
+      ],
+      minicaso: "<p>A un paciente casi le operan de la rodilla equivocada: la enfermera lo detecta en la lista de verificación. No hubo daño, pero lo peor razonable es un daño permanente. Con una frecuencia «ocasional», la matriz da riesgo alto (SAC 2): merece al menos un ACR simplificado, aunque nadie sufriera daño.</p>",
+      practica: { href: "#/analisis/ej-mini-lateralidad/1", texto: "Ver el minicaso" } },
+    { n: 5, c: "P", titulo: "El análisis causa raíz, paso a paso", sub: "Del incidente a las acciones, sin buscar culpables",
+      minuto: [
+        "Un <b>equipo de 4 a 6 personas</b>, con expertos en el proceso y gente de distintos niveles. <b>Sin los implicados</b>: a ellos se les entrevista.",
+        "<b>La cronología</b>: lo que pasó, hora a hora, frente a lo que debería haber pasado. Los desajustes son <b>problemas en la atención</b>.",
+        "<b>Los factores contribuyentes</b>: un Ishikawa por problema, con las categorías de la guía, del Protocolo de Londres o de SEIPS.",
+        "<b>Afirmaciones causales</b> con las cinco reglas, <b>acciones</b> según su fuerza, <b>medida</b> e <b>información</b> al paciente, la familia y los profesionales."
+      ],
+      secciones: [
+        { t: "Los nueve pasos", h: "<ol><li>Decidir qué se analiza, con un criterio explícito.</li><li>Empezar pronto: en 72 horas.</li><li>Formar el equipo, sin los implicados.</li><li>Reconstruir lo que pasó: cronología y flujograma.</li><li>Identificar los factores que contribuyeron.</li><li>Escribir las afirmaciones causales.</li><li>Diseñar las acciones: al menos una fuerte o intermedia.</li><li>Medir si funcionan.</li><li>Informar a los profesionales y al paciente o la familia.</li></ol>" },
+        { t: "Protocolo de Londres, RCA² y APEA", h: "<p>Son caminos parecidos. El <b>RCA²</b> (National Patient Safety Foundation, 2016) insiste en las acciones fuertes y su medida. El <b>Protocolo de Londres</b> (2004, nueva edición en 2024) mira todo el sistema con sus niveles de factores, separa los problemas en la atención y pide anotar también lo que salió bien. En España, el Ministerio de Sanidad llama a todos ellos <b>análisis en profundidad de eventos adversos (APEA)</b> y recomienda conservar el informe <b>anonimizado</b>.</p>" },
+        { t: "Mirar todo el sistema", h: "<p>Vincent y colaboradores ordenaron los factores en siete niveles: paciente, tarea, profesional, equipo, entorno de trabajo, organización y gestión, y contexto institucional. SEIPS, el modelo de factores humanos, pone a la persona en el centro de su sistema de trabajo: tareas, herramientas y tecnología, entorno y organización. Los dos sirven para no quedarse en la persona que estaba allí.</p>" }
+      ],
+      minicaso: "<p>En la UGC de Atención Primaria, un paciente recibió dos veces el mismo antiagregante durante un mes: tras el alta quedaron activas la receta antigua y la nueva con otro nombre comercial. El ACR descartó enseguida el «despiste del médico»: no había ningún paso del circuito del alta en el que alguien revisara la medicación completa.</p>",
+      practica: { href: "#/analisis/ej-acr-sepsis/1", texto: "Ver el ACR de la sepsis" } },
+    { n: 6, c: "H", titulo: "Las cinco reglas de la causalidad", sub: "Afirmaciones causales que apuntan al sistema",
+      minuto: [
+        "Una <b>afirmación causal</b> une una causa con su efecto y con lo que pasó: «Como [causa], [efecto], lo que aumentó la probabilidad de [lo que pasó]».",
+        "Las cinco reglas del informe RCA² (de las de los veteranos de Estados Unidos) evitan culpar y obligan a ser concretos.",
+        "No es un ejercicio de gramática: una afirmación bien escrita «vende» por qué hace falta la acción."
+      ],
+      secciones: [
+        { t: "Las cinco reglas, con ejemplos", h: "<ol><li><b>Mostrar la relación causa-efecto.</b> No: «la enfermera estaba cansada». Sí: «Como la enfermera cubría a la vez seis boxes y la sala, el deterioro de la paciente no se detectó durante tres horas».</li><li><b>Descripciones precisas, sin palabras vagas ni negativas</b> («mal», «inadecuado», «descuidado»). No: «el protocolo es deficiente». Sí: «el protocolo no dice quién reevalúa ni cada cuánto».</li><li><b>Todo error humano tiene una causa previa.</b> «La alerta de sepsis no saltó porque las constantes del triaje no estaban completas».</li><li><b>Saltarse un procedimiento no es una causa raíz</b>: explica por qué se lo saltaron. «El protocolo de reevaluación no se aplicaba porque no se había asignado a ningún puesto».</li><li><b>No actuar solo es causa si había obligación de actuar.</b> «No consta reevaluación, que el protocolo exige cada 90 minutos».</li></ol>" }
+      ],
+      minicaso: "<p>Primer borrador: «La enfermera fue descuidada y no reevaluó a la paciente». Incumple tres reglas (2, 1 y 5). Reescrita: «Como la reevaluación de la sala de espera no estaba asignada a ningún puesto en el turno de noche (protocolo, apartado 3), el deterioro de la paciente no se detectó durante tres horas».</p>",
+      practica: { href: "#/analisis/ej-mini-culpa/6", texto: "Reescribir una afirmación" } },
+    { n: 7, c: "V", titulo: "Acciones fuertes y cómo medirlas", sub: "Que el error sea difícil, no que la gente se acuerde",
+      minuto: [
+        "<b>Fuertes</b>: cambian el sistema y dependen poco de la memoria (función forzada en el programa, simplificar el proceso, estandarizar, cambiar el espacio).",
+        "<b>Intermedias</b>: ayudan, pero aún dependen de las personas (listas de verificación, alertas, más personal en horas punta, redundancia).",
+        "<b>Débiles</b>: formación, recordatorios, carteles, un procedimiento nuevo. Hacen falta a menudo, pero <b>solas rara vez bastan</b>.",
+        "Cada acción con <b>un responsable</b> (una persona, no un comité), <b>plazo</b> e <b>indicador</b>: qué se mide, sobre qué total, qué nivel se espera y cuándo."
+      ],
+      secciones: [
+        { t: "De débil a fuerte", h: "<p>La primera idea del equipo suele ser débil. Basta preguntar «¿y si cambiamos el proceso?»: «recordar que hay que tomar la temperatura» → «dos termómetros fijos en el puesto, revisión semanal del material y el campo obligatorio en el programa».</p>" },
+        { t: "Medir en tres tiempos", h: "<ol><li>Que la acción <b>existe</b> (el campo obligatorio está puesto).</li><li>Que <b>se hace</b> como se previó (el 95 % de los triajes tiene las cuatro constantes).</li><li>Que <b>funciona</b>: el resultado cambia (menos sepsis detectadas tarde).</li></ol><p>No midas la eficacia contando incidentes notificados: si la gente notifica más, parecerá que va peor.</p>" },
+        { t: "La dirección decide", h: "<p>El equipo propone las acciones más eficaces que se le ocurran, sin recortarse. La dirección decide si merecen la inversión, y solo ella puede aceptar el riesgo de no hacerlas.</p>" }
+      ],
+      minicaso: "<p>Tras dos caídas en el baño, el equipo propone una sesión de formación, un cartel y recordar a los pacientes que llamen. Las tres son débiles. Más fuerte: barras y timbre al alcance desde el inodoro, y una cama baja para los pacientes con riesgo.</p>",
+      practica: { href: "#/analisis/ej-mini-caidas/4", texto: "Ver el minicaso de las caídas" } },
+    { n: 8, c: "A", titulo: "Después del análisis: informar y apoyar", sub: "Devolver, acompañar y comprobar",
+      minuto: [
+        "Informar de las conclusiones a los <b>profesionales implicados</b> y al <b>paciente o su familia</b> forma parte del análisis, no es un trámite.",
+        "El Protocolo de Londres de 2024 pide <b>implicar</b> al paciente y a la familia en la investigación y <b>apoyar</b> a todos tras el incidente.",
+        "Los profesionales implicados son también víctimas (<b>segundas víctimas</b>): necesitan apoyo, no solo preguntas.",
+        "Deja fecha para <b>revisar los indicadores</b>: si no funcionan, hay que buscar otra acción."
+      ],
+      secciones: [
+        { t: "En el caso de la sepsis", h: "<p>El jefe de servicio habló con la familia al día siguiente: explicó lo que se sabía, lamentó lo ocurrido y prometió contarles las conclusiones, cosa que hizo un mes después. La supervisora apoyó a la enfermera del triaje durante el análisis.</p>" },
+        { t: "Otras formas de aprender de los casos", h: "<ul><li><b>Sesiones de morbilidad y mortalidad</b>, centradas en el sistema.</li><li><b>Revisiones temáticas</b>: en lugar de un caso a fondo, muchos parecidos (todas las caídas del año) para encontrar patrones.</li></ul>" }
+      ],
+      minicaso: "<p>Un análisis terminado y archivado sin contárselo a nadie no cambia la cultura: la próxima vez, nadie notificará. Devolver en dos semanas qué se hizo con cada notificación es una de las formas más baratas de mejorar.</p>",
+      practica: { href: "#/analisis/ej-acr-sepsis/8", texto: "Ver el cierre del caso de la sepsis" } }
   ];
 
   // ---------- Glosario ----------
@@ -83,18 +148,69 @@
     ["SAC", "Código de evaluación de la seguridad: nivel de riesgo de un incidente según su gravedad y su frecuencia. En el SiNASP, SAC 1 es riesgo extremo y SAC 4, bajo."],
     ["SEIPS", "Modelo de factores humanos que describe el sistema de trabajo: persona(s), tareas, herramientas y tecnología, entorno interno, organización y entorno externo."],
     ["Segunda víctima", "Profesional afectado emocionalmente tras un evento adverso en el que ha participado. Necesita apoyo."],
-    ["SiNASP", "Sistema de Notificación y Aprendizaje para la Seguridad del Paciente del Ministerio de Sanidad."]
+    ["SiNASP", "Sistema de Notificación y Aprendizaje para la Seguridad del Paciente del Ministerio de Sanidad."],
+    ["Barrera", "Lo que está pensado para detener un error o proteger del daño: una comprobación, una alerta, una función forzada. En el queso suizo, cada loncha."],
+    ["Cronología", "Lo que pasó, hora a hora, reconstruido con la historia clínica, los registros y las entrevistas, y comparado con lo que debería haber pasado."],
+    ["Desajuste", "Diferencia entre lo que pasó y lo que debería haber pasado. Es el punto de partida para buscar causas."],
+    ["Entrevista", "Conversación con quien intervino o con el paciente o la familia para entender lo que pasó. Se hace con empatía, en privado y sin buscar culpables."],
+    ["Evento centinela", "Evento adverso grave e inesperado (por ejemplo, una muerte evitable o una cirugía en el lado equivocado) que obliga a analizarlo a fondo."],
+    ["Factores humanos", "Disciplina que estudia cómo encajan las personas con sus tareas, sus herramientas y su entorno, para diseñar sistemas en los que sea fácil hacerlo bien."],
+    ["Indicador de proceso", "Mide si algo se hace (por ejemplo, el % de triajes con las cuatro constantes)."],
+    ["Indicador de resultado", "Mide lo que le pasa al paciente (por ejemplo, las sepsis detectadas tarde)."],
+    ["Lo que salió bien", "Lo que protegió al paciente o funcionó como debía. El Protocolo de Londres de 2024 pide anotarlo: enseña qué hay que conservar."],
+    ["Preguntas desencadenantes", "Lista de preguntas que ayudan al equipo a no olvidar ninguna área (comunicación, formación, turnos, entorno y equipos, normas, barreras)."],
+    ["Problema en la atención", "En el Protocolo de Londres, algo que se salió de los límites seguros en la atención y pudo influir en el resultado. Cada uno tiene sus factores."],
+    ["PSIRF", "Marco de respuesta a los incidentes de seguridad del NHS de Inglaterra (2022): implicar a los afectados, mirar el sistema y responder de forma proporcionada."],
+    ["Respuesta proporcionada", "Elegir el tipo de análisis según el riesgo y lo que se puede aprender: desde una revisión breve hasta un ACR completo."],
+    ["Revisión temática", "Analizar juntos muchos incidentes parecidos para encontrar patrones, en lugar de uno solo a fondo."],
+    ["Seis M", "Categorías clásicas del Ishikawa en la industria: mano de obra, métodos, máquinas, materiales, medición y medio ambiente."]
   ];
 
   // ---------- Ponte a prueba (las cinco del capítulo 8; las demás llegan en la entrega 4) ----------
-  const TEMAS_TEST = { 1: { nom: "Ishikawa", aprende: 2 }, 2: { nom: "Análisis causa raíz", aprende: 1 } };
+  const TEMAS_TEST = { 1: { nom: "Ishikawa", aprende: 2 }, 2: { nom: "Análisis causa raíz", aprende: 5 }, 3: { nom: "Afirmaciones causales", aprende: 6 }, 4: { nom: "Acciones y medida", aprende: 7 } };
   const TEST = [
     { t: 1, q: "¿Cuál de estos es un problema bien definido para un Ishikawa?", o: ["«La sala de espera es un desastre».", "«Falta personal».", "«En 7 de 25 episodios con esperas de más de 90 minutos no consta la reevaluación».", "«Hay que contratar a una enfermera»."], ok: 2, e: "Un hecho concreto y medible. Las demás son opiniones o soluciones." },
     { t: 2, q: "«La enfermera se olvidó de reevaluar». Según las reglas de la causalidad, ¿qué falta?", o: ["Nada.", "La causa previa del olvido: el error humano tiene que tener una causa.", "El nombre de la enfermera.", "La sanción."], ok: 1, e: "Hay que explicar qué hizo posible el olvido (por ejemplo, que la tarea no estaba asignada)." },
     { t: 2, q: "¿Quién no debe formar parte del equipo de un análisis causa raíz?", o: ["Un experto en el proceso.", "Alguien de otro nivel de la organización.", "Los profesionales implicados en el incidente.", "Un representante de los pacientes ajeno al caso."], ok: 2, e: "Los implicados se entrevistan, pero no forman parte del equipo." },
     { t: 2, q: "¿Cuál es la acción más fuerte tras un incidente por constantes incompletas en el triaje?", o: ["Una sesión formativa.", "Un cartel.", "Que el programa no deje cerrar el triaje sin las constantes.", "Un recordatorio por correo."], ok: 2, e: "Una función forzada en el programa no depende de la memoria." },
-    { t: 2, q: "¿Cuándo recomienda el informe RCA² empezar un análisis?", o: ["En el plazo de un año.", "En las 72 horas siguientes a decidir que hace falta.", "Cuando lo pida un juez.", "Solo si hay fallecimiento."], ok: 1, e: "En las 72 horas siguientes a reconocer que hace falta, y terminarlo en 30 a 45 días." }
+    { t: 2, q: "¿Cuándo recomienda el informe RCA² empezar un análisis?", o: ["En el plazo de un año.", "En las 72 horas siguientes a decidir que hace falta.", "Cuando lo pida un juez.", "Solo si hay fallecimiento."], ok: 1, e: "En las 72 horas siguientes a reconocer que hace falta, y terminarlo en 30 a 45 días." },
+    { t: 1, q: "En un Ishikawa, ¿qué va en la cabeza del pez?", o: ["La solución.", "El problema: el efecto que queremos explicar.", "La causa principal.", "El nombre del responsable."], ok: 1, e: "La cabeza es el efecto. Las causas posibles van en las espinas." },
+    { t: 1, q: "¿Cuándo se para de preguntar «¿por qué?»?", o: ["Siempre a la quinta vez.", "Cuando aparece una persona a la que culpar.", "Cuando se llega a algo que el equipo puede cambiar y medir.", "A la primera respuesta."], ok: 2, e: "El cinco es orientativo: se para al llegar a algo que se puede cambiar y medir." },
+    { t: 1, q: "El equipo ha elegido tres causas de fondo. ¿Qué toca antes de actuar?", o: ["Nada: si el equipo lo cree, es así.", "Comprobarlas con datos: una causa probable no es una causa demostrada.", "Votar otra vez.", "Pedir a la dirección que elija una."], ok: 1, e: "Hay que comprobarlas: revisar historias, observar, entrevistar, mirar un indicador." },
+    { t: 1, q: "Para un proceso de almacén o de esterilización, ¿qué categorías del Ishikawa encajan mejor?", o: ["Las seis M (mano de obra, métodos, máquinas, materiales, medición, medio ambiente).", "Solo «paciente».", "Ninguna: el Ishikawa es solo clínico.", "Las del test de cultura de seguridad."], ok: 0, e: "Para procesos no clínicos o de soporte, las 6M de la industria funcionan bien." },
+    { t: 2, q: "En la matriz SAC del SiNASP, ¿qué significa SAC 1?", o: ["Riesgo bajo.", "Riesgo extremo: toca un análisis causa raíz.", "Que no llegó al paciente.", "Que es el primer incidente del año."], ok: 1, e: "En el SiNASP, SAC 1 es el riesgo extremo (al revés que en el RCA²)." },
+    { t: 2, q: "En un casi incidente, ¿cómo se puntúa la gravedad?", o: ["Siempre como mínima, porque no hubo daño.", "Con lo peor que razonablemente podría haber pasado.", "No se puntúa.", "Según lo que diga el implicado."], ok: 1, e: "Se usa el peor caso razonable: así se analizan a tiempo los riesgos graves." },
+    { t: 2, q: "¿Qué es un «problema en la atención» en el Protocolo de Londres?", o: ["Una queja del paciente.", "Algo que se salió de los límites seguros en la atención y pudo influir en el resultado.", "Un fallo del programa informático.", "El nombre del responsable del turno."], ok: 1, e: "Cada problema en la atención se analiza con sus propios factores contribuyentes." },
+    { t: 2, q: "¿Qué pide anotar el Protocolo de Londres de 2024 además de lo que falló?", o: ["El nombre de los implicados.", "Lo que salió bien.", "El coste del incidente.", "Nada más."], ok: 1, e: "Reconocer lo que salió bien enseña qué hay que conservar." },
+    { t: 3, q: "«El manual de la bomba está mal escrito». ¿Qué regla incumple?", o: ["Ninguna.", "La 2: usa una palabra vaga («mal») en vez de describir qué tiene.", "La 5.", "La 4."], ok: 1, e: "Mejor: «el manual tiene letra de 8 puntos y ninguna ilustración, así que casi nadie lo usa»." },
+    { t: 3, q: "«Los técnicos no siguieron el protocolo del TAC». ¿Qué falta?", o: ["Nada.", "Explicar por qué no lo siguieron: saltarse un procedimiento no es causa raíz.", "Sus nombres.", "La sanción."], ok: 1, e: "Ruido, confusión o presión de tiempo pueden ser la causa previa (regla 4)." },
+    { t: 3, q: "«Nadie comprobó las órdenes urgentes cada media hora». ¿Cuándo es eso una causa?", o: ["Siempre.", "Solo si había una obligación previa de hacerlo (escrita y asignada).", "Nunca.", "Si hubo daño."], ok: 1, e: "Regla 5: no actuar solo es causa si había deber de actuar; si no lo había, la causa es que no estaba asignado." },
+    { t: 4, q: "¿Cuál es la acción más débil?", o: ["Una función forzada en el programa.", "Simplificar el proceso.", "Una sesión de formación.", "Estandarizar el material."], ok: 2, e: "La formación depende de que la gente se acuerde: es débil, aunque a menudo necesaria." },
+    { t: 4, q: "¿Quién debe ser el responsable de una acción?", o: ["El equipo de análisis.", "La comisión de seguridad.", "Una persona con autoridad para hacerla.", "Todo el personal."], ok: 2, e: "Si se reparte entre muchos, nadie responde de ella (RCA²)." },
+    { t: 4, q: "¿Qué indicador dice mejor si funciona «responsable de la reevaluación con aviso a los 90 minutos»?", o: ["Número de incidentes notificados.", "% de pacientes en espera reevaluados dentro de los 90 minutos.", "Número de sesiones hechas.", "Número de carteles puestos."], ok: 1, e: "Mide lo que cambia, en cuántos de cuántos. Contar notificaciones engaña: si se notifica más, parece que va peor." },
+    { t: 4, q: "Según el informe RCA², ¿qué debe tener cada análisis como mínimo?", o: ["Diez acciones.", "Al menos una acción fuerte o intermedia.", "Una sanción.", "Solo acciones de formación."], ok: 1, e: "Las débiles pueden acompañar, pero no bastan solas." }
   ];
+  // Ejercicios prácticos: ¿qué regla incumple? y ¿qué fuerza tiene?
+  const EJERCICIOS = {
+    reglas: [
+      { texto: "La enfermera de triaje fue descuidada.", regla: 2, e: "Juicio sobre la persona, sin describir las condiciones." },
+      { texto: "El residente estaba cansado.", regla: 1, e: "No dice qué efecto tuvo ni qué pasó por ello." },
+      { texto: "El médico se equivocó de dosis y el paciente recibió el doble.", regla: 3, e: "El error humano necesita su causa previa (por ejemplo, dosis muy juntas en la pantalla)." },
+      { texto: "Enfermería no siguió el protocolo de caídas, lo que llevó a la caída.", regla: 4, e: "Hay que explicar por qué no se siguió." },
+      { texto: "Nadie revisó la nevera de vacunas el fin de semana.", regla: 5, e: "¿Había alguien con esa tarea asignada? Si no, la causa es que no estaba asignada." },
+      { texto: "La comunicación entre turnos era deficiente.", regla: 2, e: "«Deficiente» es vago: ¿qué faltaba? ¿Un traspaso estructurado? ¿Tiempo?" }
+    ],
+    fuerza: [
+      { texto: "Que el programa no deje cerrar el triaje sin las cuatro constantes.", f: "fuerte" },
+      { texto: "Una lista de verificación antes de la cirugía.", f: "intermedia" },
+      { texto: "Un cartel recordando la higiene de manos.", f: "debil" },
+      { texto: "Un solo modelo de bomba de perfusión en todo el hospital.", f: "fuerte" },
+      { texto: "Una alerta del programa por interacciones entre fármacos.", f: "intermedia" },
+      { texto: "Una sesión de formación sobre la reevaluación.", f: "debil" },
+      { texto: "Repetir en voz alta los valores críticos de laboratorio.", f: "intermedia" },
+      { texto: "Nueva instrucción: «revisad las vías cada 2 horas».", f: "debil" }
+    ]
+  };
 
 
   // ---------- Preguntas desencadenantes (propias, a partir del RCA² apéndice 2, la Joint Commission y el Protocolo de Londres) ----------
@@ -236,8 +352,47 @@
     notas: "Caso ficticio. Equipo formado en las primeras 72 horas; ninguno estaba de guardia aquella noche.",
     creado: "2027-01-13T10:00:00.000Z", modificado: "2027-02-05T12:00:00.000Z"
   };
+
+  // ---------- Minicasos (inventados, cortos: cada uno practica un paso) ----------
+  const mc = (id, cat, texto, o = {}) => causa(id, cat, texto, o);
+  const acc = (id, que, o = {}) => Object.assign({ id, que, categoria: "", causas: [], responsable: "", plazo: "", estado: "pendiente", indicador: { nombre: "", numerador: "", denominador: "", esperado: "", fecha: "" }, nota: "" }, o);
+  const base = (id, tipo, titulo, o) => Object.assign({ id, tipo, titulo, unidad: "Caso inventado", ambito: "hospital", plantilla: "guia", causas: [], acciones: [], creado: "2027-03-01T10:00:00.000Z", modificado: "2027-03-01T10:00:00.000Z" }, o);
+  const MINICASOS = [
+    base("ej-mini-ap", "acr", "Doble antiagregante tras el alta", { ambito: "primaria", unidad: "UGC de Atención Primaria (caso inventado)",
+      incidente: { clase: "ea", fecha: "2027-02-20", fechaDecision: "2027-02-21", gravedad: "3", frecuencia: "3", conducta: "no", inmediata: { atendido: true, seguro: true, apartado: false, informado: true }, nota: "" },
+      problema: "Un paciente tomó dos veces el mismo antiagregante durante un mes porque, tras un alta hospitalaria, quedaron activas en la receta electrónica la prescripción antigua y la nueva con distinto nombre comercial.",
+      dato: "Un mes con doble antiagregación; hematomas, sin ingreso", fuenteDato: "Historia clínica y receta electrónica",
+      causas: [mc("ej-ap1", "procedimiento", "Ningún paso del circuito del alta revisa la medicación completa", { elegida: true, prueba: "comprobada", comprobacion: "Revisión del circuito del alta con la enfermera gestora de casos.", porques: ["El circuito se diseñó para las curas, no para la medicación"] }),
+        mc("ej-ap2", "equipamiento", "La receta electrónica no avisa de dos fármacos con el mismo principio activo", { votos: 4 }),
+        mc("ej-ap3", "personal", "Despiste del médico de familia", { porques: [""] }),
+        mc("ej-ap4", "paciente", "El paciente no reconoce el nuevo nombre comercial", { votos: 3 })],
+      acciones: [acc("ej-apx", "Cita de enfermería obligatoria en la semana siguiente a cada alta, con conciliación de la receta.", { causas: ["ej-ap1"], responsable: "Coordinación de enfermería de la UGC", plazo: "2027-04-01", indicador: { nombre: "% de altas con conciliación de la receta en 7 días", numerador: "Altas con conciliación registrada en 7 días", denominador: "Altas del mes", esperado: "≥ 90 %", fecha: "2027-06-01" } })] }),
+    base("ej-mini-caidas", "ishikawa", "Caídas en el baño", { problema: "En el último trimestre se notificaron 6 caídas en el baño en la unidad de Medicina Interna, 4 de ellas de noche.", dato: "6 caídas; 4 de noche", fuenteDato: "Notificaciones",
+      causas: [mc("ej-cd1", "entorno", "El timbre del baño no se alcanza desde el inodoro", { elegida: true, prueba: "comprobada", comprobacion: "Visita a los 12 baños de la unidad." }), mc("ej-cd2", "paciente", "Pacientes mayores con diuréticos que se levantan de noche", { elegida: true, prueba: "probable", comprobacion: "Revisar las 6 historias." }), mc("ej-cd3", "equipamiento", "Camas altas sin posibilidad de bajarlas"), mc("ej-cd4", "personal", "Poco personal de noche")],
+      acciones: [acc("ej-cdx1", "Sesión de formación sobre prevención de caídas.", { causas: ["ej-cd2"], responsable: "Supervisión de la unidad", plazo: "2027-04-15" }), acc("ej-cdx2", "Cartel en el baño: «Llame antes de levantarse».", { causas: ["ej-cd1"], responsable: "Supervisión de la unidad", plazo: "2027-04-01" }), acc("ej-cdx3", "Recordar a los pacientes que pidan ayuda por la noche.", { causas: ["ej-cd2"], responsable: "El equipo", plazo: "2027-04-01" })] }),
+    base("ej-mini-lateralidad", "acr", "Casi cirugía en la rodilla equivocada", {
+      incidente: { clase: "casi", fecha: "2027-03-02", fechaDecision: "", gravedad: "", frecuencia: "", conducta: "", inmediata: { atendido: false, seguro: false, apartado: false, informado: false }, nota: "La enfermera circulante lo detectó al leer la lista de verificación en voz alta." },
+      problema: "Un paciente citado para artroscopia de la rodilla derecha llegó a quirófano con la izquierda marcada; se detectó en la lista de verificación antes de la incisión." }),
+    base("ej-mini-culpa", "acr", "Una afirmación que culpa", { problema: "Un paciente con dolor torácico esperó 50 minutos en la sala sin electrocardiograma, que el protocolo exige en 10.",
+      incidente: { clase: "sindano", fecha: "2027-02-10", fechaDecision: "2027-02-11", gravedad: "6", frecuencia: "2", conducta: "no", inmediata: { atendido: true, seguro: true, apartado: false, informado: true }, nota: "" },
+      causas: [mc("ej-cu1", "organizacion", "El electrocardiograma del triaje lo hace quien esté libre", { elegida: true, prueba: "comprobada", comprobacion: "Entrevistas y revisión del protocolo.", porques: ["No está asignado a ningún puesto"] })],
+      afirmaciones: [{ id: "ej-cuf", causaId: "ej-cu1", texto: "La enfermera fue descuidada y no hizo el electrocardiograma a tiempo.", deber: "", pruebas: "" }] }),
+    base("ej-mini-esteril", "ishikawa", "Instrumental incompleto", { plantilla: "m6", unidad: "Central de esterilización (caso inventado)",
+      problema: "En marzo, en 4 de las 120 cajas de instrumental de traumatología faltaba una pieza al abrirlas en quirófano.", dato: "4 de 120 cajas (3 %)", fuenteDato: "Registro de incidencias de quirófano",
+      causas: [mc("ej-es1", "metodos", "La lista de contenido de la caja no tiene fotos"), mc("ej-es2", "materiales", "Piezas pequeñas que se quedan en la cesta de lavado", { porques: ["La cesta tiene la malla demasiado abierta"] }), mc("ej-es3", "manoObra", "Personal nuevo en el montaje de cajas"), mc("ej-es4", "medicion", "No se cuenta el instrumental al cerrar la caja")] }),
+    base("ej-mini-personal", "ishikawa", "«Falta de personal»", { problema: "En el último mes, 12 de 40 pacientes de la planta no tenían registrada la valoración del dolor del turno de tarde.", dato: "12 de 40 (30 %)", fuenteDato: "Auditoría de historias",
+      causas: [mc("ej-pe1", "personal", "Falta de personal"), mc("ej-pe2", "personal", "Falta de formación"), mc("ej-pe3", "procedimiento", "Falta de protocolo"), mc("ej-pe4", "comunicacion", "Mala comunicación")] })
+  ];
+  const FICHAS_MINI = [
+    { t: "Doble antiagregante tras el alta", s: "Atención Primaria: un ACR que descarta el «despiste del médico». Paso 7: la acción fuerte.", href: "#/analisis/ej-mini-ap/7" },
+    { t: "Caídas en el baño", s: "Tres acciones, las tres débiles. Mira los avisos del paso 4 y busca una más fuerte.", href: "#/analisis/ej-mini-caidas/4" },
+    { t: "Casi cirugía en la rodilla equivocada", s: "Un casi incidente sin daño. Paso 1: ¿hace falta un ACR? Puntúa la gravedad por el peor caso.", href: "#/analisis/ej-mini-lateralidad/1" },
+    { t: "Una afirmación que culpa", s: "«La enfermera fue descuidada…». Paso 6: reescríbela con las cinco reglas.", href: "#/analisis/ej-mini-culpa/6" },
+    { t: "Instrumental incompleto", s: "Un proceso de soporte con las 6M. Paso 2: completa la espina.", href: "#/analisis/ej-mini-esteril/2" },
+    { t: "«Falta de personal»", s: "Cuatro causas que no son el final. Paso 2: pregunta «¿por qué?».", href: "#/analisis/ej-mini-personal/2" }
+  ];
   const EJEMPLOS = {
-    analisis: [ISH_SALA, ACR_SEPSIS],
+    analisis: [ISH_SALA, ACR_SEPSIS, ...MINICASOS], minicasos: FICHAS_MINI,
     fichas: [
       { t: "1. El problema", s: "Un hecho concreto y medible, con su dato", href: "#/analisis/ej-ish-sala/1" },
       { t: "2. La espina", s: "Trece causas en siete categorías", href: "#/analisis/ej-ish-sala/2" },
@@ -257,7 +412,7 @@
     ]
   };
 
-  const api = { TEMAS, GLOSARIO, TEMAS_TEST, TEST, PREGUNTAS, EJEMPLOS };
+  const api = { TEMAS, GLOSARIO, TEMAS_TEST, TEST, EJERCICIOS, PREGUNTAS, EJEMPLOS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else raiz.Contenido = api;
 })(typeof window !== "undefined" ? window : globalThis);

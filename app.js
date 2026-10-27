@@ -15,8 +15,16 @@
   // ---------- Versión y novedades ----------
   // Al publicar cambios: añadir una entrada AL PRINCIPIO de NOVEDADES, poner su versión en los ?v= de index.html, en
   // APP_VERSION y subir CACHE_NAME en sw.js. Formato de versión: AAAA.NN.
-  const APP_VERSION = "2026.03";
+  const APP_VERSION = "2026.04";
   const NOVEDADES = [
+    { version: "2026.04", fecha: "Octubre 2026", titulo: "Conexiones, Aprende completo, ejercicios y minicasos", cambios: [
+      /*[eco]*/"«Traer de» AMFE o Mapa de Riesgos (un fallo con su causa, sus acciones y, desde la copia de AMFE, su Ishikawa), de Rondas de Seguridad (lo que falla una y otra vez), de Flujograma (los pasos como «lo que debería haber pasado») y de Indicadores y Lectura Crítica (el indicador y la evidencia de una acción).",/*[/eco]*/
+      /*[ind] "Cargar el archivo de copia de AMFE, Mapa de Riesgos, Rondas de Seguridad, Flujograma, Indicadores o Lectura Crítica para empezar desde sus datos.", [/ind]*/
+      "Aprende, completo: ocho temas, del porqué de no buscar culpables a cómo informar y apoyar después.",
+      "Ponte a prueba: veinte preguntas por temas y dos ejercicios (¿qué regla incumple?, ¿qué fuerza tiene?).",
+      "Seis minicasos: Atención Primaria, caídas con acciones débiles, un casi incidente de lateralidad, una afirmación que culpa, esterilización con las 6M y «falta de personal».",
+      "Modo reunión para proyectar la espina y la cronología. Glosario con 42 términos."
+    ] },
     { version: "2026.03", fecha: "Octubre 2026", titulo: "El análisis causa raíz completo: afirmaciones causales, medida, información e informe", cambios: [
       "Paso 6: afirmaciones causales con el formato «Como [causa], [efecto], lo que aumentó la probabilidad de [lo que pasó]» y comprobación de las cinco reglas de la causalidad del informe RCA² mientras escribes; propuesta de redacción desde cada causa de fondo.",
       "Paso 7: en el ACR, cada acción dice quién puede hacerla, si la dirección está de acuerdo y qué mide su indicador (que existe, que se hace o que funciona), con el resultado medido.",
@@ -187,9 +195,9 @@
         <div class="toolbar"><button class="btn" data-act="copia">⬇ Copia de seguridad</button><button class="btn" data-act="importar">⬆ Importar copia</button></div>
       </div>
       <div class="guide">
-        <a class="guide-card" href="#/ejemplos"><span class="guide-num">Ej</span><div><div class="guide-q">Ejemplo</div><div class="guide-a">El Ishikawa de la <b>sala de espera de Urgencias</b>: trece causas, los «¿por qué?», las causas de fondo comprobadas con datos y la acción.</div></div><span class="guide-go">›</span></a>
-        <a class="guide-card" href="#/aprende"><span class="guide-num">?</span><div><div class="guide-q">Aprende</div><div class="guide-a">${C.TEMAS.length} temas <b>explicados fácil</b>: por qué no buscamos culpables, el Ishikawa y los cinco porqués.</div></div><span class="guide-go">›</span></a>
-        <a class="guide-card" href="#/prueba"><span class="guide-num">✓</span><div><div class="guide-q">Ponte a prueba</div><div class="guide-a">${C.TEST.length} preguntas con su <b>explicación</b>.</div></div><span class="guide-go">›</span></a>
+        <a class="guide-card" href="#/ejemplos"><span class="guide-num">Ej</span><div><div class="guide-q">Ejemplo</div><div class="guide-a">El Ishikawa de la <b>sala de espera de Urgencias</b>, el <b>análisis causa raíz de la paciente con sepsis</b> y seis minicasos para practicar.</div></div><span class="guide-go">›</span></a>
+        <a class="guide-card" href="#/aprende"><span class="guide-num">?</span><div><div class="guide-q">Aprende</div><div class="guide-a">${C.TEMAS.length} temas <b>explicados fácil</b>: de por qué no buscamos culpables a las acciones fuertes y cómo informar.</div></div><span class="guide-go">›</span></a>
+        <a class="guide-card" href="#/prueba"><span class="guide-num">✓</span><div><div class="guide-q">Ponte a prueba</div><div class="guide-a">${C.TEST.length} preguntas con su <b>explicación</b>, y dos ejercicios prácticos.</div></div><span class="guide-go">›</span></a>
         <a class="guide-card" href="#/glosario"><span class="guide-num">A–Z</span><div><div class="guide-q">Glosario</div><div class="guide-a">${C.GLOSARIO.length} términos <b>en lenguaje llano</b>, con buscador.</div></div><span class="guide-go">›</span></a>
         <!-- [eco] -->
         <a class="guide-card guide-card--hermana" href="${L.URL_AMFE}" target="_blank" rel="noopener"><span class="guide-num">A</span><div><div class="guide-q">AMFE ↗</div><div class="guide-a">App hermana: busca <b>qué puede fallar</b> en un proceso antes de que pase. Lo proactivo, frente a lo reactivo de esta app.</div></div><span class="guide-go">›</span></a>
@@ -271,6 +279,10 @@
         ${campo(a, "unidad", "Unidad o servicio", { opt: true })}
         ${a.tipo === "acr" ? campo(a, "descripcion", "Qué pasó (resumen)", { area: true, rows: 4, opt: true, ph: "Sin nombres ni datos que identifiquen a nadie", help: "Breve: lo que se sabe al empezar. La cronología detallada llega en el paso 4." }) : ""}
       </div>
+      <div class="card traer no-print"><h3 class="sub-h">¿Viene de otra app?</h3>
+        <p class="field-sub">Empieza desde un fallo de un AMFE o de un Mapa de Riesgos (el fallo, su causa, sus acciones y, desde la copia de AMFE, su Ishikawa), o desde lo que falla una y otra vez en las rondas de seguridad. Se copia: luego puedes cambiarlo todo.</p>
+        <div class="toolbar"><button class="btn" data-act="traer" data-f="amfe">Traer de AMFE</button><button class="btn" data-act="traer" data-f="mapa">Traer de Mapa de Riesgos</button><button class="btn" data-act="traer" data-f="rondas">Traer de Rondas de Seguridad</button></div>
+        ${lleno(a.origen) ? `<p class="field-sub">Origen: ${esc(a.origen)}</p>` : ""}</div>
       ${trampa(`Sin nombres, números de historia ni fechas de nacimiento: ni del paciente ni de los profesionales.${anonimizador()}`)}`;
   }
 
@@ -295,8 +307,9 @@
   }
   // La espina en pantalla va en un «papel» blanco (igual que se exporta); en el móvil se desplaza dentro de su caja
   const espinaCaja = (a, extra = "") => `<div class="esp-graf${extra}" data-zesp="1" role="figure" aria-label="Diagrama de Ishikawa">${espinaHtml(a)}</div>`;
+  const btnReunion = () => `<button type="button" class="btn btn--sm" data-act="reunion">${document.body.classList.contains("modo-reunion") ? "Salir del modo reunión" : "🖥 Modo reunión"}</button>`;
   function opcionesVista() {
-    return `<div class="esp-op no-print"><label><input type="checkbox" data-act="vista-porques"${vista.porques ? " checked" : ""} /> Ver los «¿por qué?»</label><label><input type="checkbox" data-act="vista-solo"${vista.solo ? " checked" : ""} /> Solo las causas de fondo</label></div>`;
+    return `<div class="esp-op no-print">${btnReunion()}<label><input type="checkbox" data-act="vista-porques"${vista.porques ? " checked" : ""} /> Ver los «¿por qué?»</label><label><input type="checkbox" data-act="vista-solo"${vista.solo ? " checked" : ""} /> Solo las causas de fondo</label></div>`;
   }
   function selectorEspinas(a) {
     const E = L.espinasDe(a); if (a.tipo !== "acr") return "";
@@ -395,8 +408,11 @@
         <div class="grid-2">${campo(x, "indicador.numerador", "Numerador", { bind: bac(x, "indicador.numerador"), ph: "Los casos que cumplen", opt: true })}${campo(x, "indicador.denominador", "Denominador", { bind: bac(x, "indicador.denominador"), ph: "Todos los casos que se miran", opt: true })}</div>
         <div class="grid-2">${campo(x, "indicador.esperado", "Nivel esperado", { bind: bac(x, "indicador.esperado"), ph: "≥ 90 %" })}${campo(x, "indicador.fecha", "Cuándo se mide", { bind: bac(x, "indicador.fecha"), tipo: "date" })}</div>
         <div class="grid-2">${campo(x, "indicador.resultado", "Resultado medido", { bind: bac(x, "indicador.resultado"), ph: "Por ejemplo: 22 de 25 (88 %)", opt: true })}<div class="field"><div class="field-head"><label class="field-label">¿Se alcanzó?</label></div><div class="seg" role="group">${[["si", "Sí"], ["no", "No"]].map(([v, t]) => `<button type="button" class="${x.indicador.alcanzado === v ? "active" : ""}" data-acpick="${x.id}" data-f="indicador.alcanzado" data-v="${v}">${t}</button>`).join("")}</div></div></div>
+        <div class="toolbar no-print"><button type="button" class="btn btn--sm" data-act="traer" data-f="ind" data-id="${x.id}">Traer de Indicadores</button></div>
         <p class="field-sub">Mide lo que cambia (lo que se hace, en cuántos casos de cuántos), no el número de incidentes notificados.<!--[eco]--> Para diseñarlo con calma, usa la app <a href="${L.URL_IND}" target="_blank" rel="noopener">Indicadores ↗</a>; para saber cuántos casos revisar, <a href="${L.URL_TM}" target="_blank" rel="noopener">Tamaño Muestral ↗</a>.<!--[/eco]--></p>
       </details>
+      ${campo(x, "nota", "Notas y evidencia", { bind: bac(x, "nota"), area: true, opt: true, ph: "Por qué esta acción: evidencia, experiencia de otros centros…" })}
+      <div class="toolbar no-print"><button type="button" class="btn btn--sm" data-act="traer" data-f="lc" data-id="${x.id}" title="Añade a las notas la evidencia de un artículo leído con la app Lectura Crítica">📄 Traer de Lectura Crítica</button></div>
       <div data-zac="${x.id}">${L.avisosAcciones(a).filter(y => y.accion === x.id).map(avisoHtml).join("")}</div>
     </div>`;
   }
@@ -503,7 +519,7 @@
       ${facil(`<p><b>La cronología en la pared.</b> Pega una tira de papel continuo con las horas marcadas. Cada dato va en un pósit, en su hora: llegada, triaje, constantes, avisos, llamadas, consulta. Debajo, en otro color, lo que debería haber pasado según el protocolo. Los huecos y los desajustes se ven enseguida, y el equipo trabaja sobre los hechos, no sobre los recuerdos.</p><p>Cada desajuste importante se puede convertir en un <b>problema en la atención</b> (Protocolo de Londres): algo que se salió de los límites seguros y pudo influir en el resultado. En el paso 5, cada uno puede tener su propia espina.</p><!--[eco]--><p>Si el proceso está dibujado en la app <a href="${L.URL_FLUJO}" target="_blank" rel="noopener">Flujograma ↗</a>, úsalo como guion de «lo que debería haber pasado».</p><!--[/eco]-->`)}
       <div data-zona="avisos">${avisosGenerales(a, pasoActual)}</div>
       ${a.cronologia.map((h, i) => hechoHtml(a, h, i)).join("")}
-      <div class="toolbar no-print"><button class="btn btn--primary" data-act="h-add">+ Hecho</button></div>
+      <div class="toolbar no-print"><button class="btn btn--primary" data-act="h-add">+ Hecho</button>${btnReunion()}<button class="btn" data-act="traer" data-f="flujo" title="Los pasos del proceso, como «lo que debería haber pasado»">Traer de Flujograma</button></div>
       <h2 class="sec-t">Problemas en la atención</h2>
       <p class="field-sub">Lo que se salió de los límites seguros y pudo influir en el resultado. Pocos y claros: cada uno tendrá sus factores.</p>
       ${a.problemasAtencion.map((x, i) => `<div class="card fila-x"><div class="pa-fila"><span class="hx-n">${i + 1}</span><input class="txt-in" ${bp(x, "texto")} value="${esc(x.texto)}" placeholder="Por ejemplo: la paciente no fue reevaluada durante tres horas" autocomplete="off" /><button type="button" class="icon-btn" data-act="pa-del" data-id="${x.id}" aria-label="Quitar">✕</button></div>${x.hechoId ? `<span class="field-sub">Viene del hecho ${a.cronologia.findIndex(h => h.id === x.hechoId) + 1}</span>` : ""}</div>`).join("")}
@@ -674,7 +690,7 @@
     if (!t) {
       view.innerHTML = `
         <h1 class="page-title">Aprende</h1>
-        <p class="page-lead">${T.length} temas, explicados fácil, para tener a mano mientras buscas las causas. Más temas (el análisis causa raíz paso a paso, las cinco reglas, las acciones fuertes, informar y apoyar) en las próximas versiones.</p>
+        <p class="page-lead">${T.length} temas, explicados fácil, para tener a mano mientras buscas las causas.</p>
         <div class="temas">${T.map(x => `<a class="tema-card pdca--${x.c}" href="#/aprende/${x.n}"><span class="tema-n">${x.n}</span><span><b>${x.titulo}</b><span>${x.sub}</span></span></a>`).join("")}</div>`;
       return;
     }
@@ -690,20 +706,42 @@
   }
 
   // ---------- Ponte a prueba ----------
-  const respuestas = {};
+  const respuestas = {}, respReglas = {}, respFuerza = {};
+  const pillsPrueba = actualP => `<div class="tema-pills prueba-pills no-print"><a href="#/prueba" class="pdca--P${!actualP ? " actual" : ""}" title="Todas las preguntas">T</a>${Object.keys(C.TEMAS_TEST).map(k => `<a href="#/prueba/${k}" class="pdca--P${String(actualP) === k ? " actual" : ""}" title="${esc(C.TEMAS_TEST[k].nom)}">${k}</a>`).join("")}<a href="#/prueba/practica" class="pdca--H${actualP === "practica" ? " actual" : ""}" title="Ejercicios prácticos">✎</a></div>`;
   const barajar = (n, semilla) => { const a = Array.from({ length: n }, (_, i) => i); let s = semilla * 9301 + 49297; for (let i = n - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  function renderPrueba() {
-    const Q = C.TEST.map((q, i) => Object.assign({ i }, q));
+  function renderPrueba(tema) {
+    if (tema === "practica") { renderPractica(); return; }
+    const Q = C.TEST.map((q, i) => Object.assign({ i }, q)).filter(q => !tema || q.t === tema);
     view.innerHTML = `
       <h1 class="page-title">Ponte a prueba</h1>
-      <p class="page-lead">${C.TEST.length} preguntas sobre el Ishikawa y el análisis causa raíz. Toca la respuesta que creas correcta y lee la explicación. Más preguntas y ejercicios prácticos en las próximas versiones.</p>
+      <p class="page-lead">${C.TEST.length} preguntas sobre el Ishikawa y el análisis causa raíz${tema ? ` (aquí, las de «${esc(C.TEMAS_TEST[tema].nom)}»)` : ""}. Toca la respuesta que creas correcta y lee la explicación. Y en ✎, dos ejercicios prácticos.</p>
+      ${pillsPrueba(tema)}
       <div class="marcador" data-zona="marcador">${marcadorHtml(Q)}</div>
       <div class="card">${Q.map(q => { const ord = barajar(q.o.length, q.i + 1), r = respuestas[q.i]; return `<div class="quiz-q" data-q="${q.i}">
         <p><span class="badge">${esc(C.TEMAS_TEST[q.t].nom)}</span> <b>${esc(q.q)}</b></p>
         ${ord.map(j => `<button class="quiz-o${r != null ? (j === q.ok ? " quiz-o--ok" : j === r ? " quiz-o--mal" : "") : ""}" data-act="quiz" data-q="${q.i}" data-o="${j}">${esc(q.o[j])}</button>`).join("")}
         <p class="quiz-fb"${r == null ? " hidden" : ""}>${r != null ? `${r === q.ok ? "<b>¡Correcto!</b> " : "<b>No.</b> "}${esc(q.e)} <a href="#/aprende/${C.TEMAS_TEST[q.t].aprende}">Repasar en «Aprende»</a>` : ""}</p>
       </div>`; }).join("")}</div>
-      <div class="toolbar no-print"><button class="btn" data-act="quiz-reset">Empezar de nuevo</button></div>`;
+      <div class="toolbar no-print"><button class="btn" data-act="quiz-reset">Empezar de nuevo</button><a class="btn btn--primary" href="#/prueba/practica">Ejercicios prácticos →</a></div>`;
+  }
+  const FZ_NOM = { fuerte: "Fuerte", intermedia: "Intermedia", debil: "Débil" };
+  function renderPractica() {
+    const E = C.EJERCICIOS, br = E.reglas.filter((x, i) => respReglas[i] === x.regla).length, bf = E.fuerza.filter((x, i) => respFuerza[i] === x.f).length;
+    view.innerHTML = `
+      <h1 class="page-title">Ponte a prueba · ejercicios</h1>
+      <p class="page-lead">Dos ejercicios para entrenar el ojo.</p>
+      ${pillsPrueba("practica")}
+      <h2 class="sec-t">1. ¿Qué regla de la causalidad incumple?</h2>
+      <p class="field-sub">${Object.keys(respReglas).length ? `<b>${br} de ${Object.keys(respReglas).length}</b> bien. ` : ""}${C.TEMAS[5] ? `<a href="#/aprende/6">Repasa las cinco reglas</a>.` : ""}</p>
+      <div class="card">${E.reglas.map((x, i) => { const r = respReglas[i]; return `<div class="quiz-q fec-q"><p><b>«${esc(x.texto)}»</b></p>
+        <div class="seg seg--wrap" role="group">${L.REGLAS.map(g => `<button type="button" class="${r === g.n ? (g.n === x.regla ? "fec-ok" : "fec-mal") : r && g.n === x.regla ? "fec-ok" : ""}" data-act="ej-regla" data-i="${i}" data-v="${g.n}" title="${esc(g.nom)}">Regla ${g.n}</button>`).join("")}</div>
+        ${r ? `<p class="quiz-fb">${r === x.regla ? "<b>¡Correcto!</b> " : `<b>No: es la regla ${x.regla}</b> (${esc(L.REGLAS[x.regla - 1].nom.toLowerCase())}). `}${esc(x.e)}</p>` : ""}</div>`; }).join("")}</div>
+      <h2 class="sec-t">2. ¿Qué fuerza tiene esta acción?</h2>
+      <p class="field-sub">${Object.keys(respFuerza).length ? `<b>${bf} de ${Object.keys(respFuerza).length}</b> bien. ` : ""}<a href="#/aprende/7">Repasa la jerarquía</a>.</p>
+      <div class="card">${E.fuerza.map((x, i) => { const r = respFuerza[i]; return `<div class="quiz-q fec-q"><p><b>${esc(x.texto)}</b></p>
+        <div class="seg seg--wrap" role="group">${Object.keys(FZ_NOM).map(k => `<button type="button" class="${r === k ? (k === x.f ? "fec-ok" : "fec-mal") : r && k === x.f ? "fec-ok" : ""}" data-act="ej-fuerza" data-i="${i}" data-v="${k}">${FZ_NOM[k]}</button>`).join("")}</div>
+        ${r ? `<p class="quiz-fb">${r === x.f ? "<b>¡Correcto!</b>" : `<b>No: es ${FZ_NOM[x.f].toLowerCase()}.</b>`} ${esc(L.FUERZAS[x.f].que)}</p>` : ""}</div>`; }).join("")}</div>
+      <div class="toolbar no-print"><button class="btn" data-act="practica-reset">Empezar de nuevo</button><a class="btn" href="#/prueba">← Preguntas del test</a></div>`;
   }
   function marcadorHtml(Q) {
     const hechas = Q.filter(q => q.i in respuestas), bien = hechas.filter(q => respuestas[q.i] === q.ok).length;
@@ -723,8 +761,9 @@
       <h2 class="sec-t">Análisis causa raíz: la paciente de la sala de espera</h2>
       <p class="field-sub">Unas semanas antes de la auditoría había ocurrido un evento adverso: una paciente de 82 años, triada con prioridad 3, empeoró en la sala de espera y, cuando la llamaron a consulta casi tres horas después, tenía una sepsis grave e ingresó en la UCI. Se notificó y la dirección decidió hacer un ACR. Los ocho pasos: la decisión, el equipo formado en 72 horas, la cronología, una espina por cada problema en la atención, las tres afirmaciones causales, las acciones con su indicador y la información a la familia.<!--[eco]--> Es el caso del capítulo 8 de la guía.<!--[/eco]--></p>
       <div class="ej-grid">${C.EJEMPLOS.fichasAcr.map(f => `<a class="ej-card" href="${f.href}"><b>${esc(f.t)}</b><span>${esc(f.s)}</span></a>`).join("")}</div>
-      <h2 class="sec-t">Próximamente</h2>
-      <p class="field-sub">Seis minicasos para practicar y las conexiones con las demás apps.</p>
+      <h2 class="sec-t">Minicasos</h2>
+      <p class="field-sub">Casos cortos e inventados. Cada uno abre en el paso que practica.</p>
+      <div class="ej-grid ej-grid--mini">${C.EJEMPLOS.minicasos.map(f => `<a class="ej-card" href="${f.href}"><b>${esc(f.t)}</b><span>${esc(f.s)}</span></a>`).join("")}</div>
       ${practica("El caso de Urgencias es ficticio. Adapta siempre las causas y las acciones a tu unidad.")}`;
   }
 
@@ -944,7 +983,7 @@
     si.textContent = siTxt; si.className = "btn " + (o.peligro === false ? "btn--primary" : "btn--peligro");
     let extra = $("#btn-conf-otro"); if (extra) extra.remove();
     if (o.otro) { extra = document.createElement("button"); extra.id = "btn-conf-otro"; extra.className = "btn"; extra.textContent = o.otro[0]; no.after(extra); extra.onclick = () => { m.hidden = true; o.otro[1](); }; }
-    si.onclick = () => { alSi(); m.hidden = true; };
+    si.onclick = () => { m.hidden = true; alSi(); };
     no.onclick = () => { m.hidden = true; if (o.alNo) o.alNo(); };
     m.hidden = false; si.focus();
   }
@@ -1009,7 +1048,7 @@
     else if (partes[0] === "ejemplos") renderEjemplos();
     else if (partes[0] === "aprende") renderAprende(parseInt(partes[1], 10) || 0);
     else if (partes[0] === "glosario") renderGlosario();
-    else if (partes[0] === "prueba") renderPrueba();
+    else if (partes[0] === "prueba") renderPrueba(partes[1] === "practica" ? "practica" : (C.TEMAS_TEST[partes[1]] ? Number(partes[1]) : 0));
     else { renderHome(); navR = ""; }
     if (modoEjemplo) navR = "ejemplos";
     if (informe) { $$("details").forEach(d => { d.open = true; }); if (esIOS()) prepararPDF(); }
@@ -1093,6 +1132,8 @@
     else if (act === "pa-add" && a) { a.problemasAtencion.push(L.nuevoProblemaAt(genId())); tocado(a); repintar(); }
     else if (act === "pa-del" && a) { const x = buscaEn(a.problemasAtencion, id); if (!x) return; const n = a.causas.filter(c => c.espina === id && lleno(c.texto)).length; const hacer = () => { a.problemasAtencion = a.problemasAtencion.filter(y => y.id !== id); a.causas.forEach(c => { if (c.espina === id) c.espina = ""; }); if (espinaActual === id) espinaActual = ""; tocado(a); repintar(); }; if (n) confirmar(`<p>Se quitará el problema «${esc(L.corto(x.texto, 60))}». Sus ${plural(n, "causa pasa", "causas pasan")} a la espina principal.</p>`, "Quitar", hacer); else hacer(); }
     else if (act === "espina-sel") { espinaActual = id || ""; repintar(); }
+    else if (act === "traer" && a) traerA(a, b.dataset.f, id);
+    else if (act === "reunion") ponerReunion(!document.body.classList.contains("modo-reunion"));
     else if (act === "af-add" && a) { const f = Object.assign(L.nuevaAfirmacion(genId()), { causaId: id || "" }); const x = a.causas.find(c => c.id === id); if (x) f.texto = L.afirmacionSugerida(a, x); a.afirmaciones.push(f); tocado(a); repintar(); const el = $(`[data-af="${f.id}"][data-f="texto"]`); if (el) { el.focus(); el.scrollIntoView({ block: "center" }); } }
     else if (act === "af-del" && a) { const f = buscaEn(a.afirmaciones, id); if (!f) return; const hacer = () => { a.afirmaciones = a.afirmaciones.filter(y => y.id !== id); tocado(a); repintar(); }; if (lleno(f.texto)) confirmar(`<p>Se quitará la afirmación «${esc(L.corto(f.texto, 70))}».</p>`, "Quitar", hacer); else hacer(); }
     else if (act === "af-sug" && a) { const f = buscaEn(a.afirmaciones, id), x = f && a.causas.find(c => c.id === f.causaId); if (!x) return; const hacer = () => { f.texto = L.afirmacionSugerida(a, x); tocado(a); repintar(); }; if (lleno(f.texto)) confirmar("<p>Se sustituirá el texto de la afirmación por la propuesta.</p>", "Sustituir", hacer, { peligro: false }); else hacer(); }
@@ -1158,15 +1199,97 @@
     // --- Ponte a prueba ---
     else if (act === "quiz") {
       const q = Number(b.dataset.q); if (q in respuestas) return;
-      respuestas[q] = Number(b.dataset.o); const y = window.scrollY; renderPrueba(); window.scrollTo(0, y);
+      respuestas[q] = Number(b.dataset.o); const y = window.scrollY; route(); window.scrollTo(0, y);
     }
-    else if (act === "quiz-reset") { Object.keys(respuestas).forEach(k => delete respuestas[k]); renderPrueba(); }
+    else if (act === "quiz-reset") { Object.keys(respuestas).forEach(k => delete respuestas[k]); route(); }
+    else if (act === "ej-regla" || act === "ej-fuerza") { const R0 = act === "ej-regla" ? respReglas : respFuerza, i = Number(b.dataset.i); if (i in R0) return; R0[i] = act === "ej-regla" ? Number(b.dataset.v) : b.dataset.v; const y = window.scrollY; renderPractica(); window.scrollTo(0, y); }
+    else if (act === "practica-reset") { [respReglas, respFuerza].forEach(o => Object.keys(o).forEach(k => delete o[k])); renderPractica(); }
   });
   $("#input-importar").addEventListener("change", e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) importar(f); });
   // Imprimir: abrir los desplegables y restaurarlos después
   let cerrados = [];
   window.addEventListener("beforeprint", () => { cerrados = $$("details").filter(d => !d.open); cerrados.forEach(d => { d.open = true; }); });
   window.addEventListener("afterprint", () => { cerrados.forEach(d => { d.open = false; }); cerrados = []; });
+
+  // ---------- Datos de otras apps (copia saneada, sin vínculo vivo) ----------
+  // Lee el paquete que la otra app deja en este navegador o, si no hay, ofrece cargar su copia .json (#input-ext).
+  const FUENTES_EXT = {
+    amfe: { nom: "AMFE", leer: o => L.leerFallos(o) },
+    mapa: { nom: "Mapa de Riesgos", leer: o => L.leerFallos(o) },
+    rondas: { nom: "Rondas de Seguridad", leer: o => L.leerRondas(o) },
+    flujo: { nom: "Flujograma", leer: o => L.leerFlujos(o) },
+    ind: { nom: "Indicadores", leer: o => L.leerIndicadores(o) },
+    lc: { nom: "Lectura Crítica", leer: o => L.lecturasDe(o) }
+  };
+  // [eco]
+  const CLAVES_EXT = { amfe: "amfe-intercambio", mapa: "mapariesgos-intercambio", rondas: "rondas-intercambio", flujo: "flujograma-intercambio", ind: "indicadores-datos", lc: "lecturacritica-intercambio" };
+  // [/eco]
+  const cargadosExt = {}; let pendienteExt = null;
+  function traerExt(fuente, alElegir) {
+    const F = FUENTES_EXT[fuente], titulo = "Traer de " + F.nom; pendienteExt = { fuente, alElegir, titulo };
+    // [eco]
+    let r = null; try { r = F.leer(JSON.parse(leer(CLAVES_EXT[fuente]) || "null")); } catch (e) { /* */ }
+    const lista = cargadosExt[fuente] || (r && r.lista && r.lista.length ? r.lista : null);
+    if (lista) { alElegir(lista, titulo); return; }
+    confirmar(r && r.error === "version" ? `<p>Los datos de <b>${F.nom}</b> de este navegador son de una versión que esta app aún no sabe leer.</p>`
+      : `<p>No hay datos de la app <b>${F.nom}</b> en este navegador${fuente === "ind" ? "" : " (o no tienen nada que traer)"}.</p><p>Si los tienes en otro dispositivo, carga su copia de seguridad (.json).</p>`,
+      "Cargar una copia", () => $("#input-ext").click(), { titulo, peligro: false });
+    // [/eco]
+    /* [ind]
+    if (cargadosExt[fuente]) { alElegir(cargadosExt[fuente], titulo); return; }
+    $("#input-ext").click();
+    [/ind] */
+  }
+  $("#input-ext").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = ""; if (!f || !pendienteExt) return;
+    const { fuente, alElegir, titulo } = pendienteExt, F = FUENTES_EXT[fuente], fr = new FileReader();
+    fr.onload = () => {
+      let r = null; try { r = F.leer(JSON.parse(fr.result)); } catch (er) { /* */ }
+      if (!r || r.error) { toast(r && r.error === "version" ? `Esa copia es de una versión de ${F.nom} que esta app aún no sabe leer.` : `Ese archivo no es una copia de la app ${F.nom}.`, 4500); return; }
+      if (!r.lista.length) { toast(`Esa copia de ${F.nom} no tiene nada que traer.`, 4000); return; }
+      cargadosExt[fuente] = r.lista; alElegir(r.lista, titulo);
+    };
+    fr.readAsText(f);
+  });
+  const cortar = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
+  // Ventana para elegir uno: grupos [{ titulo, items: [{ t, s }] }] → alElegir(i del grupo, j del item)
+  function elegir(titulo, intro, grupos, alElegir, siTxt = "Traer") {
+    let k = 0;
+    const html = grupos.map((g, i) => `${grupos.length > 1 || g.titulo ? `<p class="elegir-g"><b>${esc(g.titulo)}</b></p>` : ""}${g.items.map((x, j) => `<label class="lc-op"><input type="radio" name="ext-sel" value="${i}:${j}"${k++ ? "" : " checked"} /><span><b>${esc(cortar(x.t, 140))}</b>${x.s ? `<small>${esc(x.s)}</small>` : ""}</span></label>`).join("")}`).join("");
+    confirmar(`<p>${intro}</p><div class="lc-lista">${html}</div>`, siTxt, () => { const s = document.querySelector('input[name="ext-sel"]:checked'); if (!s) return; const [i, j] = s.value.split(":").map(Number); alElegir(i, j); }, { titulo, peligro: false });
+  }
+  function traerA(a, fuente, idAccion) {
+    if (fuente === "amfe" || fuente === "mapa") traerExt(fuente, (lista, titulo) => elegir(titulo, "Elige el fallo. Los prioritarios van primero.", lista.map(am => ({ titulo: `${am.titulo}${am.unidad ? " · " + am.unidad : ""}`, items: am.fallos.map(f => ({ t: `${f.num ? "Nº " + f.num + " · " : ""}${f.fallo}`, s: [f.ipr ? "IPR " + f.ipr : "", f.prioritario ? "prioritario" : "", f.critico ? "crítico" : "", f.ishikawa.length ? `Ishikawa con ${f.ishikawa.length} causas` : ""].filter(Boolean).join(" · ") })) })), (i, j) => {
+      const am = lista[i], f = am.fallos[j], hacer = () => { const r = L.traerFallo(a, am, f, genId); tocado(a); repintar(); toast(`Traído: el problema${r.causas ? `, ${plural(r.causas, "causa", "causas")}` : ""}${r.acciones ? ` y ${plural(r.acciones, "acción", "acciones")}` : ""}. Revísalo: un modo de fallo dice lo que puede pasar; el problema, lo que pasa.`, 6000); };
+      if (lleno(a.problema)) confirmar("<p>El problema que ya has escrito se queda; se añadirán las causas y las acciones del fallo.</p>", "Añadir", hacer, { peligro: false }); else hacer();
+    }));
+    else if (fuente === "rondas") traerExt(fuente, (lista, titulo) => elegir(titulo, "Elige el punto caliente: lo que falla una y otra vez.", lista.map(u => ({ titulo: u.unidad, items: u.calientes.map(p => ({ t: p.texto, s: [p.bloque, p.por === "turno" ? "falla en el turno de " + (p.turno || "…") : "falla de forma repetida"].filter(Boolean).join(" · ") })) })), (i, j) => {
+      if (lleno(a.problema)) { toast("Este análisis ya tiene un problema escrito. Créalo desde un análisis nuevo.", 4500); return; }
+      L.traerCaliente(a, lista[i], lista[i].calientes[j]); tocado(a); repintar(); toast("Traído. Revisa la frase del problema y añade el dato.", 4000);
+    }));
+    else if (fuente === "flujo") traerExt(fuente, (lista, titulo) => elegir(titulo, "Elige el proceso. Sus pasos irán, en orden, a la fila de «lo que debería haber pasado»; tú escribes al lado lo que pasó.", [{ titulo: "", items: lista.map(f => ({ t: f.titulo, s: `${plural(f.pasos.length, "paso", "pasos")}${f.unidad ? " · " + f.unidad : ""}` })) }], (i, j) => {
+      const k = L.traerFlujo(a, lista[j], genId); tocado(a); repintar(); toast(k ? `${plural(k, "paso añadido", "pasos añadidos")} a la cronología. Borra los que no vengan al caso.` : "Esos pasos ya estaban en la cronología.", 5000);
+    }));
+    else if (fuente === "ind") traerExt(fuente, (lista, titulo) => elegir(titulo, "Elige el indicador para esta acción.", [{ titulo: "", items: lista.map(x => ({ t: x.nombre, s: [x.esperado, x.numerador ? "con numerador y denominador" : ""].filter(Boolean).join(" · ") })) }], (i, j) => {
+      const x = buscaEn(a.acciones, idAccion), y = lista[j]; if (!x) return;
+      const hacer = () => { Object.assign(x.indicador, { nombre: y.nombre, numerador: y.numerador, denominador: y.denominador, esperado: y.esperado || x.indicador.esperado }); tocado(a); repintar(); toast("Indicador copiado. Pon la fecha de medida.", 3500); };
+      if (lleno(x.indicador.nombre)) confirmar("<p>Se sustituirá el indicador de esta acción por el elegido.</p>", "Sustituir", hacer, { peligro: false }); else hacer();
+    }));
+    else if (fuente === "lc") traerExt(fuente, (lista, titulo) => elegir(titulo, "Elige la lectura cuya evidencia quieres añadir a las notas de la acción. Se copia como texto.", [{ titulo: "", items: lista.map(x => ({ t: x.titulo || L.referenciaLC(x), s: [x.tipoNombre, x.anio, x.decision ? L.DECISION_LC[x.decision] : "Sin decisión"].filter(Boolean).join(" · ") })) }], (i, j) => {
+      const x = buscaEn(a.acciones, idAccion), y = lista[j]; if (!x) return;
+      const hacer = () => { x.nota = [x.nota, L.textoEvidenciaLC(y)].filter(lleno).join("\n"); tocado(a); repintar(); toast("Evidencia añadida a las notas de la acción.", 3500); };
+      if (y.decision === "aplicar") hacer(); else confirmar(`<p>La decisión de esta lectura fue <b>${y.decision ? L.DECISION_LC[y.decision].toLowerCase() : "ninguna todavía"}</b>: con ella sola no basta para cambiar la práctica.</p><p>¿Añadirla de todos modos?</p>`, "Añadir igualmente", hacer, { titulo, peligro: false });
+    }));
+  }
+
+  // ---------- Modo reunión: letra grande y pantalla limpia para proyectar (RCA²: proyectar o usar pósits ayuda al equipo) ----------
+  function ponerReunion(si) {
+    document.body.classList.toggle("modo-reunion", si);
+    let x = $("#salir-reunion");
+    if (si && !x) { x = document.createElement("button"); x.id = "salir-reunion"; x.className = "btn salir-reunion no-print"; x.textContent = "✕ Salir del modo reunión"; x.addEventListener("click", () => ponerReunion(false)); document.body.appendChild(x); }
+    if (!si && x) x.remove();
+    if (actual) repintar();
+  }
 
   // ---------- Tema ----------
   function setTema(t) {
@@ -1189,7 +1312,7 @@
   $("#btn-acerca").addEventListener("click", () => { ma.hidden = false; });
   $("#btn-acerca-cerrar").addEventListener("click", () => { ma.hidden = true; });
   ma.addEventListener("click", e => { if (e.target === ma) ma.hidden = true; });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { ma.hidden = true; $("#modal-confirmar").hidden = true; } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { ma.hidden = true; $("#modal-confirmar").hidden = true; if (document.body.classList.contains("modo-reunion")) ponerReunion(false); } });
 
   // ---------- Versiones y novedades ----------
   const KEY_VERSION = "acrishikawa-version-vista";

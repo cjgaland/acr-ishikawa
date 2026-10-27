@@ -299,7 +299,21 @@ prueba("informe del ACR: bloques, tres espinas y Word con imágenes", () => {
 });
 
 // ---------- Contenido ----------
-prueba("test: cinco preguntas del capítulo 8 con respuesta válida", () => { igual(C.TEST.length, 5); C.TEST.forEach(q => si(q.ok >= 0 && q.ok < q.o.length && C.TEMAS_TEST[q.t])); });
+prueba("test: 20 preguntas (las 5 del capítulo 8 primero) con respuesta válida y tema", () => { igual(C.TEST.length, 20); igual(C.TEST[0].q, "¿Cuál de estos es un problema bien definido para un Ishikawa?"); C.TEST.forEach(q => si(q.ok >= 0 && q.ok < q.o.length && C.TEMAS_TEST[q.t] && q.e, q.q)); });
+prueba("Aprende: 8 temas con enlaces de práctica que existen", () => { igual(C.TEMAS.length, 8); const ids = new Set(C.EJEMPLOS.analisis.map(x => x.id)); C.TEMAS.forEach(t => { const m = /#\/analisis\/([^/]+)/.exec(t.practica.href); if (m) si(ids.has(m[1]), t.practica.href); }); Object.values(C.TEMAS_TEST).forEach(x => si(C.TEMAS.some(t => t.n === x.aprende))); });
+prueba("ejercicios: reglas 1–5 y fuerzas válidas", () => { C.EJERCICIOS.reglas.forEach(x => si(x.regla >= 1 && x.regla <= 5)); C.EJERCICIOS.fuerza.forEach(x => si(L.FUERZAS[x.f])); igual(new Set(C.EJERCICIOS.reglas.map(x => x.regla)).size, 5); });
+prueba("ejercicios de fuerza: la app propone la misma fuerza que la respuesta", () => C.EJERCICIOS.fuerza.forEach(x => igual(L.fuerzaAccion({ que: x.texto, categoria: "" }), x.f, x.texto)));
+prueba("minicasos: cada uno da el aviso que practica", () => {
+  const M = id => L.sanearAnalisis(JSON.parse(JSON.stringify(C.EJEMPLOS.analisis.find(x => x.id === id))), genId, "x");
+  igual(L.fuerzaAccion(M("ej-mini-ap").acciones[0]), "fuerte"); igual(M("ej-mini-ap").ambito, "primaria");
+  si(L.avisosAcciones(M("ej-mini-caidas")).some(x => /al menos una fuerte o intermedia/.test(x.texto)));
+  si(L.avisosDecidir(M("ej-mini-lateralidad"), "2027-03-02").some(x => /peor/.test(x.texto)));
+  si(L.avisosAfirmaciones(M("ej-mini-culpa")).some(x => /Regla 2/.test(x.texto)));
+  igual(L.categorias(M("ej-mini-esteril")).length, 6);
+  igual(L.avisosEspina(M("ej-mini-personal")).filter(x => /no es el final/.test(x.texto)).length, 3);
+  const enlaces = new Set(C.EJEMPLOS.analisis.map(x => x.id)); C.EJEMPLOS.minicasos.forEach(f => si(enlaces.has(/#\/analisis\/([^/]+)/.exec(f.href)[1])));
+  C.EJEMPLOS.analisis.forEach(x => si(!L.hayDatoPersonal(L.sanearAnalisis(JSON.parse(JSON.stringify(x)), genId, "x")), x.id));
+});
 prueba("glosario sin duplicados", () => { const k = C.GLOSARIO.map(g => g[0]); igual(new Set(k).size, k.length); });
 
 console.log(`\n${ok} pruebas bien, ${mal} mal`);
